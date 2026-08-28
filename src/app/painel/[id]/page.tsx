@@ -141,7 +141,7 @@ export default async function DetalheSolicitacao({
         podeVerValores={podeVerValores}
         sugestao={{
           nome: `${String(respostas.tipo || "Projeto")} — ${s.empresa || s.nome}`,
-          valor: est ? Math.round(est.total) : 0,
+          valor: podeVerValores && est ? Math.round(est.total) : 0,
           prazoSemanas: est?.semanas ?? 8,
           inicio: est?.inicio ?? "",
           entrega: est?.entrega ?? "",
