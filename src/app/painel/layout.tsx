@@ -21,6 +21,9 @@ export default async function PainelLayout({ children }: { children: React.React
           </span>
           <nav className="hidden sm:flex gap-4 text-[14.5px] text-tinta2">
             <Link href="/painel" className="hover:text-acento">Solicitações</Link>
+            {perfil.papel === "admin" && (
+              <Link href="/painel/equipe" className="hover:text-acento">Equipe</Link>
+            )}
             <Link href="/" className="hover:text-acento">Ver o site</Link>
           </nav>
           <div className="flex-1" />
