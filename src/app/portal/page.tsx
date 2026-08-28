@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Marca } from "@/components/marca";
-import { criarClienteServidor, perfilAtual } from "@/lib/supabase/servidor";
+import { criarClienteServidor, perfilAtual, ehEquipe } from "@/lib/supabase/servidor";
 import { sair } from "@/app/acoes";
 import { brl, dataCurta } from "@/lib/formato";
 
@@ -19,6 +19,7 @@ const ROTULO: Record<string, string> = {
 export default async function Portal() {
   const perfil = await perfilAtual();
   if (!perfil) redirect("/entrar");
+  const podeVerValores = !ehEquipe(perfil) || perfil.papel === "admin" || !!perfil.ve_valores;
 
   const sb = await criarClienteServidor();
   const { data: projetos } = await sb
@@ -71,7 +72,7 @@ export default async function Portal() {
                 </div>
                 <p className="mt-3 text-[13.5px] text-suave">
                   Entrega prevista: {dataCurta(p.entrega_prevista)}
-                  {p.valor_fechado ? ` · ${brl(Number(p.valor_fechado))}` : ""}
+                  {podeVerValores && p.valor_fechado ? ` · ${brl(Number(p.valor_fechado))}` : ""}
                 </p>
               </Link>
             ))}

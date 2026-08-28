@@ -31,6 +31,7 @@ export default async function ProjetoPortal({ params }: { params: Promise<{ id: 
   ]);
 
   const admin = ehEquipe(perfil);
+  const podeVerValores = !admin || perfil.papel === "admin" || !!perfil.ve_valores;
 
   return (
     <>
@@ -60,12 +61,19 @@ export default async function ProjetoPortal({ params }: { params: Promise<{ id: 
             </div>
             <span className="font-mono text-[13px] font-semibold tabular-nums">{projeto.progresso}%</span>
           </div>
-          <dl className="mt-5 grid gap-4 sm:grid-cols-3 text-[14px]">
-            {[
-              ["Início", dataCurta(projeto.inicio)],
-              ["Entrega prevista", dataCurta(projeto.entrega_prevista)],
-              ["Valor fechado", projeto.valor_fechado ? brl(Number(projeto.valor_fechado)) : "—"],
-            ].map(([r, v]) => (
+          <dl className={`mt-5 grid gap-4 text-[14px] ${podeVerValores ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+            {(
+              podeVerValores
+                ? [
+                    ["Início", dataCurta(projeto.inicio)],
+                    ["Entrega prevista", dataCurta(projeto.entrega_prevista)],
+                    ["Valor fechado", projeto.valor_fechado ? brl(Number(projeto.valor_fechado)) : "—"],
+                  ]
+                : [
+                    ["Início", dataCurta(projeto.inicio)],
+                    ["Entrega prevista", dataCurta(projeto.entrega_prevista)],
+                  ]
+            ).map(([r, v]) => (
               <div key={r}>
                 <dt className="font-mono text-[10px] tracking-widest uppercase text-suave">{r}</dt>
                 <dd className="mt-1 font-semibold tabular-nums">{v}</dd>

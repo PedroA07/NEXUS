@@ -179,7 +179,7 @@ export async function abrirProjeto(
       cliente_id: clienteId,
       nome: dados.nome,
       descricao: sol.resumo,
-      valor_fechado: dados.valor,
+      valor_fechado: dados.valor || null,
       prazo_semanas: dados.prazoSemanas,
       inicio: dados.inicio || null,
       entrega_prevista: dados.entrega || null,
@@ -275,9 +275,15 @@ export async function convidarMembroEquipe(dados: {
     perfilId = convite.user.id;
   }
 
+  const atualizacao: { nome?: string; papel: Papel; ve_valores: boolean } = {
+    papel: dados.papel,
+    ve_valores: dados.veValores,
+  };
+  if (nome) atualizacao.nome = nome;
+
   const { error: e2 } = await admin
     .from("perfis")
-    .update({ nome, papel: dados.papel, ve_valores: dados.veValores })
+    .update(atualizacao)
     .eq("id", perfilId);
   if (e2) return { ok: false, msg: e2.message };
 
@@ -289,18 +295,19 @@ export async function removerAcessoEquipe(perfilId: string): Promise<Resultado> 
   const eu = await exigirAdmin();
   if (perfilId === eu.id) return { ok: false, msg: "Você não pode remover o próprio acesso." };
 
-  const sb = await criarClienteServidor();
+  const admin = criarClienteAdmin();
+  if (!admin) return { ok: false, msg: "Defina SUPABASE_SERVICE_ROLE_KEY para remover acesso." };
 
-  const { data: alvo } = await sb.from("perfis").select("papel").eq("id", perfilId).single();
+  const { data: alvo } = await admin.from("perfis").select("papel").eq("id", perfilId).single();
   if (alvo?.papel === "admin") {
-    const { count } = await sb
+    const { count } = await admin
       .from("perfis")
       .select("id", { count: "exact", head: true })
       .eq("papel", "admin");
     if ((count ?? 0) <= 1) return { ok: false, msg: "Não é possível remover o último admin." };
   }
 
-  const { error } = await sb
+  const { error } = await admin
     .from("perfis")
     .update({ papel: "cliente", ve_valores: false })
     .eq("id", perfilId);
