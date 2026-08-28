@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { criarClienteServidor, perfilAtual } from "@/lib/supabase/servidor";
+import { criarClienteServidor, perfilAtual, ehEquipe } from "@/lib/supabase/servidor";
 import { criarClienteAdmin } from "@/lib/supabase/admin";
 import { estimar, escopoDoBriefing, PADRAO } from "@/lib/estimativa";
 import { SECOES, camposDoModo } from "@/lib/briefing";
@@ -87,7 +87,7 @@ export async function entrar(_estado: Resultado | null, form: FormData): Promise
   if (error) return { ok: false, msg: "E-mail ou senha incorretos." };
 
   const perfil = await perfilAtual();
-  redirect(perfil?.papel === "admin" ? "/painel" : "/portal");
+  redirect(ehEquipe(perfil) ? "/painel" : "/portal");
 }
 
 export async function sair() {

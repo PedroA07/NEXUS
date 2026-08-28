@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Marca } from "@/components/marca";
-import { criarClienteServidor, perfilAtual } from "@/lib/supabase/servidor";
+import { criarClienteServidor, perfilAtual, ehEquipe } from "@/lib/supabase/servidor";
 import { sair } from "@/app/acoes";
 import { brl, dataCurta, dataHora } from "@/lib/formato";
 import { Chat } from "@/components/chat";
@@ -30,7 +30,7 @@ export default async function ProjetoPortal({ params }: { params: Promise<{ id: 
     sb.from("mensagens").select("*").eq("projeto_id", id).order("criado_em"),
   ]);
 
-  const admin = perfil.papel === "admin";
+  const admin = ehEquipe(perfil);
 
   return (
     <>

@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Marca } from "@/components/marca";
-import { perfilAtual } from "@/lib/supabase/servidor";
+import { perfilAtual, ehEquipe } from "@/lib/supabase/servidor";
 import { FormularioEntrar } from "@/components/formulario-entrar";
 
 export const metadata = { title: "Entrar" };
 
 export default async function Entrar() {
   const perfil = await perfilAtual();
-  if (perfil) redirect(perfil.papel === "admin" ? "/painel" : "/portal");
+  if (perfil) redirect(ehEquipe(perfil) ? "/painel" : "/portal");
 
   return (
     <main className="min-h-dvh grid place-items-center px-5 py-12">

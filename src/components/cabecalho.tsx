@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Marca } from "./marca";
-import { perfilAtual } from "@/lib/supabase/servidor";
+import { perfilAtual, ehEquipe } from "@/lib/supabase/servidor";
 
 export async function Cabecalho() {
   const perfil = await perfilAtual();
-  const destino = perfil?.papel === "admin" ? "/painel" : "/portal";
+  const destino = ehEquipe(perfil) ? "/painel" : "/portal";
 
   return (
     <header className="sticky top-0 z-40 bg-papel/90 backdrop-blur border-b border-linha">
@@ -18,7 +18,7 @@ export async function Cabecalho() {
         <div className="flex-1" />
         {perfil ? (
           <Link href={destino} className="text-[14.5px] font-semibold text-acento hover:text-acento-forte">
-            {perfil.papel === "admin" ? "Painel" : "Meus projetos"}
+            {ehEquipe(perfil) ? "Painel" : "Meus projetos"}
           </Link>
         ) : (
           <Link href="/entrar" className="text-[14.5px] text-tinta2 hover:text-acento">Entrar</Link>

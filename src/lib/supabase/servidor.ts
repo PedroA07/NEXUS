@@ -33,3 +33,7 @@ export async function perfilAtual() {
     papel: "admin" | "funcionario" | "cliente"; ve_valores: boolean;
   } | null;
 }
+
+export function ehEquipe(perfil: { papel: string } | null | undefined) {
+  return perfil?.papel === "admin" || perfil?.papel === "funcionario";
+}
