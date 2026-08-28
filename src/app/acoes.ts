@@ -245,6 +245,72 @@ export async function mudarStatusProjeto(projetoId: string, status: string): Pro
 }
 
 /* ------------------------------------------------------------------ */
+/* equipe                                                              */
+/* ------------------------------------------------------------------ */
+
+export type Papel = "admin" | "funcionario";
+
+export async function convidarMembroEquipe(dados: {
+  email: string; nome: string; papel: Papel; veValores: boolean;
+}): Promise<Resultado> {
+  await exigirAdmin();
+  const email = dados.email.trim().toLowerCase();
+  const nome = dados.nome.trim();
+  if (!email) return { ok: false, msg: "Informe um e-mail." };
+
+  const admin = criarClienteAdmin();
+  if (!admin) return { ok: false, msg: "Defina SUPABASE_SERVICE_ROLE_KEY para convidar." };
+
+  const { data: existente } = await admin
+    .from("perfis").select("id").eq("email", email).maybeSingle();
+
+  let perfilId = existente?.id as string | undefined;
+
+  if (!perfilId) {
+    const { data: convite, error } = await admin.auth.admin.inviteUserByEmail(email, {
+      data: { nome },
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/entrar`,
+    });
+    if (error || !convite?.user) return { ok: false, msg: "Não consegui convidar: " + (error?.message ?? "") };
+    perfilId = convite.user.id;
+  }
+
+  const { error: e2 } = await admin
+    .from("perfis")
+    .update({ nome, papel: dados.papel, ve_valores: dados.veValores })
+    .eq("id", perfilId);
+  if (e2) return { ok: false, msg: e2.message };
+
+  revalidatePath("/painel/equipe");
+  return { ok: true };
+}
+
+export async function removerAcessoEquipe(perfilId: string): Promise<Resultado> {
+  const eu = await exigirAdmin();
+  if (perfilId === eu.id) return { ok: false, msg: "Você não pode remover o próprio acesso." };
+
+  const sb = await criarClienteServidor();
+
+  const { data: alvo } = await sb.from("perfis").select("papel").eq("id", perfilId).single();
+  if (alvo?.papel === "admin") {
+    const { count } = await sb
+      .from("perfis")
+      .select("id", { count: "exact", head: true })
+      .eq("papel", "admin");
+    if ((count ?? 0) <= 1) return { ok: false, msg: "Não é possível remover o último admin." };
+  }
+
+  const { error } = await sb
+    .from("perfis")
+    .update({ papel: "cliente", ve_valores: false })
+    .eq("id", perfilId);
+  if (error) return { ok: false, msg: error.message };
+
+  revalidatePath("/painel/equipe");
+  return { ok: true };
+}
+
+/* ------------------------------------------------------------------ */
 /* chat                                                                */
 /* ------------------------------------------------------------------ */
 
