@@ -29,6 +29,7 @@ export async function perfilAtual() {
   const { data } = await sb.from("perfis").select("*").eq("id", user.id).single();
   return data as {
     id: string; nome: string | null; email: string | null;
-    telefone: string | null; empresa: string | null; papel: "admin" | "cliente";
+    telefone: string | null; empresa: string | null;
+    papel: "admin" | "funcionario" | "cliente"; ve_valores: boolean;
   } | null;
 }

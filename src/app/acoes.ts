@@ -106,8 +106,14 @@ async function exigirAdmin() {
   return perfil;
 }
 
+async function exigirEquipe() {
+  const perfil = await perfilAtual();
+  if (perfil?.papel !== "admin" && perfil?.papel !== "funcionario") throw new Error("Acesso restrito.");
+  return perfil;
+}
+
 export async function mudarStatusSolicitacao(id: string, status: string): Promise<Resultado> {
-  await exigirAdmin();
+  await exigirEquipe();
   const sb = await criarClienteServidor();
   const { error } = await sb
     .from("solicitacoes")
@@ -120,7 +126,7 @@ export async function mudarStatusSolicitacao(id: string, status: string): Promis
 }
 
 export async function salvarObservacoes(id: string, texto: string): Promise<Resultado> {
-  await exigirAdmin();
+  await exigirEquipe();
   const sb = await criarClienteServidor();
   const { error } = await sb
     .from("solicitacoes")
@@ -136,7 +142,7 @@ export async function abrirProjeto(
   solicitacaoId: string,
   dados: { nome: string; valor: number; prazoSemanas: number; inicio: string; entrega: string },
 ): Promise<Resultado> {
-  await exigirAdmin();
+  await exigirEquipe();
   const sb = await criarClienteServidor();
 
   const { data: sol, error: e1 } = await sb
@@ -203,7 +209,7 @@ export async function publicarAtualizacao(
   projetoId: string,
   dados: { titulo: string; corpo: string; fase: string; progresso: number },
 ): Promise<Resultado> {
-  const perfil = await exigirAdmin();
+  const perfil = await exigirEquipe();
   const sb = await criarClienteServidor();
 
   const { error } = await sb.from("atualizacoes").insert({
@@ -227,7 +233,7 @@ export async function publicarAtualizacao(
 }
 
 export async function mudarStatusProjeto(projetoId: string, status: string): Promise<Resultado> {
-  await exigirAdmin();
+  await exigirEquipe();
   const sb = await criarClienteServidor();
   const { error } = await sb
     .from("projetos")

@@ -9,7 +9,7 @@ export const metadata = { title: "Painel" };
 export default async function PainelLayout({ children }: { children: React.ReactNode }) {
   const perfil = await perfilAtual();
   if (!perfil) redirect("/entrar");
-  if (perfil.papel !== "admin") redirect("/portal");
+  if (perfil.papel === "cliente") redirect("/portal");
 
   return (
     <>
