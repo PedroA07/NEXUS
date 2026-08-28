@@ -16,10 +16,12 @@ e área do cliente com acompanhamento de projeto e chat em tempo real.
 | `/solicitar` | Briefing em 2 versões (rápida e completa), 59 campos, com ícones de informação e o bloco de responsabilidades | público |
 | `/solicitar/enviado` | Confirmação com protocolo e os 4 passos até o orçamento real | público |
 | `/entrar` | Login | público |
-| `/painel` | Lista de solicitações, indicadores e projetos | admin |
-| `/painel/[id]` | Briefing completo + estimativa automática de prazo e valor + decisão + abrir projeto | admin |
+| `/painel` | Lista de solicitações, indicadores e projetos | admin, funcionário |
+| `/painel/[id]` | Briefing completo + estimativa automática de prazo e valor + decisão + abrir projeto | admin, funcionário |
+| `/painel/equipe` | Convidar, listar e remover acesso de funcionários | admin |
 | `/portal` | Projetos do cliente | cliente |
-| `/portal/[id]` | Progresso, linha do tempo de atualizações e chat | cliente e admin |
+| `/portal/[id]` | Progresso, linha do tempo de atualizações e chat | cliente, admin e funcionário |
+| `/conta` | Editar nome, telefone e empresa | qualquer logado |
 
 A **estimativa é calculada no servidor** no momento em que a solicitação chega
 (`src/lib/estimativa.ts`) e fica gravada em `solicitacoes.estimativa`. É a mesma
@@ -40,6 +42,9 @@ No **SQL Editor**, rode na ordem:
 
 1. `supabase/migrations/0001_init.sql` — tabelas, políticas de acesso e realtime
 2. `supabase/migrations/0002_seed_portfolio.sql` — portfólio inicial (revise os textos antes)
+3. `supabase/migrations/0003_perfis_colunas_restritas.sql` — trava colunas de `perfis` pra evitar auto-promoção de papel
+4. `supabase/migrations/0004_papel_funcionario.sql` — papel de funcionário e coluna de visibilidade de valores
+5. `supabase/migrations/0005_rls_equipe.sql` — **em execução separada da 0004** (função `e_equipe()` e políticas de RLS de equipe — rodar junto dá erro de enum)
 
 > Em `0002` há um projeto descrito como "autarquia previdenciária municipal".
 > Confirme com o cliente antes de publicar qualquer nome real.

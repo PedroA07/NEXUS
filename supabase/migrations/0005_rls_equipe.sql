@@ -1,6 +1,7 @@
 -- =====================================================================
 -- Nexus — papel de funcionário, visibilidade de valores, RLS de equipe
--- Rode no SQL Editor do Supabase, depois de 0001 e 0002.
+-- Rode em EXECUÇÃO SEPARADA da 0004 (na mesma transação dá "unsafe use of new
+-- value of enum type" — o Postgres exige que o valor do enum já esteja commitado).
 -- =====================================================================
 
 -- quem é admin OU funcionário (acesso operacional amplo)

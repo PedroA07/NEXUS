@@ -20,7 +20,8 @@ sem mexer no resto.
 
 ## Seção 1 — Modelo de permissões (banco)
 
-Nova migration `supabase/migrations/0003_equipe_e_perfil.sql`:
+Novas migrations `supabase/migrations/0004_papel_funcionario.sql` e
+`supabase/migrations/0005_rls_equipe.sql`:
 
 - `papel_usuario` ganha o valor `'funcionario'` (via `alter type ... add value if not exists`)
 - `perfis` ganha `ve_valores boolean not null default false` — só é consultado quando
@@ -37,7 +38,7 @@ Nova migration `supabase/migrations/0003_equipe_e_perfil.sql`:
 **Risco a validar na implementação:** `ALTER TYPE ... ADD VALUE` tem restrições de uso
 do valor novo dentro da mesma transação, dependendo de como o SQL Editor do Supabase
 agrupa os statements. Se der erro de "unsafe use of new value", separar em duas
-migrations (`0003_papel_funcionario.sql` só com o enum/coluna, `0004_rls_equipe.sql`
+migrations (`0004_papel_funcionario.sql` só com o enum/coluna, `0005_rls_equipe.sql`
 com funções/políticas).
 
 ## Seção 2 — Convite e gestão de equipe (UI)
@@ -75,6 +76,16 @@ Pontos a ajustar:
 
 `/portal` (área do cliente) não muda — lá o valor é do próprio cliente sobre o próprio
 projeto, sempre visível a ele.
+
+**Limitação conhecida:** `ve_valores` controla o que a interface mostra, não o que a
+API do Supabase retorna — um funcionário tem uma sessão válida e pode, tecnicamente,
+consultar `valor_fechado`/`estimativa` direto via REST (`e_equipe()` libera leitura
+de linha inteira nas policies de `solicitacoes`/`projetos`). Isso é aceitável para o
+nível de confiança esperado da equipe (colegas convidados manualmente pelo admin, não
+o público); não há bloqueio de coluna adicional para evitar over-engineering. Se essa
+garantia precisar ser real (não só de interface), o caminho é `revoke`/`grant` por
+coluna nessas duas tabelas também, roteando leituras privilegiadas pela service role
+— não implementado aqui.
 
 ## Seção 4 — Editar meus dados (`/conta`)
 

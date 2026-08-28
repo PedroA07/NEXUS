@@ -42,7 +42,7 @@ Auth Admin API), TypeScript, Tailwind v4.
 ## Task 1: Migration — papel de equipe, visibilidade de valores e RLS
 
 **Files:**
-- Create: `supabase/migrations/0003_equipe_e_perfil.sql`
+- Create: `supabase/migrations/0004_papel_funcionario.sql`, `supabase/migrations/0005_rls_equipe.sql`
 
 **Interfaces:**
 - Produces: enum `papel_usuario` com valor `'funcionario'`; coluna `perfis.ve_valores
@@ -138,8 +138,8 @@ returned`.
 usar um valor de enum recém-criado na mesma transação em certas comparações. Divida o
 arquivo em dois e rode em duas execuções separadas no SQL Editor (cada `Run` do SQL
 Editor é a sua própria transação):
-- `0003_papel_funcionario.sql`: só os dois primeiros comandos (`alter type` e `alter table`)
-- `0004_rls_equipe.sql`: o resto (função `e_equipe()` e todas as políticas)
+- `0004_papel_funcionario.sql`: só os dois primeiros comandos (`alter type` e `alter table`)
+- `0005_rls_equipe.sql`: o resto (função `e_equipe()` e todas as políticas)
 
 Rode o primeiro, confirme sucesso, depois rode o segundo.
 
@@ -153,7 +153,7 @@ information_schema.columns where table_name = 'perfis' and column_name =
 - [ ] **Step 4: Commit**
 
 ```bash
-git add supabase/migrations/0003_equipe_e_perfil.sql
+git add supabase/migrations/0004_papel_funcionario.sql supabase/migrations/0005_rls_equipe.sql
 git commit -m "feat: adiciona papel funcionario, ve_valores e RLS de equipe"
 ```
 
