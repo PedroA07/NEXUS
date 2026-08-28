@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { criarClienteServidor } from "@/lib/supabase/servidor";
+import { criarClienteServidor, perfilAtual } from "@/lib/supabase/servidor";
 import { brl, brl2, dataCurta, dataHora } from "@/lib/formato";
 import { AcoesSolicitacao } from "@/components/acoes-solicitacao";
 import { SECOES, camposDoModo } from "@/lib/briefing";
@@ -12,6 +12,8 @@ export default async function DetalheSolicitacao({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const perfil = await perfilAtual();
+  const podeVerValores = perfil?.papel === "admin" || !!perfil?.ve_valores;
   const sb = await criarClienteServidor();
   const { data: s } = await sb.from("solicitacoes").select("*").eq("id", id).single();
   if (!s) notFound();
@@ -57,7 +59,7 @@ export default async function DetalheSolicitacao({
         </div>
       </div>
 
-      {est && (
+      {podeVerValores && est && (
         <section className="cartao p-6 mt-7">
           <h2 className="text-xl font-bold">Estimativa automática</h2>
           <p className="mt-1 text-[13.5px] text-suave">
@@ -136,6 +138,7 @@ export default async function DetalheSolicitacao({
         id={s.id}
         status={s.status}
         observacoes={s.observacoes_internas ?? ""}
+        podeVerValores={podeVerValores}
         sugestao={{
           nome: `${String(respostas.tipo || "Projeto")} — ${s.empresa || s.nome}`,
           valor: est ? Math.round(est.total) : 0,

@@ -16,18 +16,20 @@ export function AcoesSolicitacao({
   status,
   observacoes,
   sugestao,
+  podeVerValores,
 }: {
   id: string;
   status: string;
   observacoes: string;
   sugestao: { nome: string; valor: number; prazoSemanas: number; inicio: string; entrega: string };
+  podeVerValores: boolean;
 }) {
   const router = useRouter();
   const [pendente, iniciar] = useTransition();
   const [notas, setNotas] = useState(observacoes);
   const [salvo, setSalvo] = useState(false);
   const [abrindo, setAbrindo] = useState(false);
-  const [form, setForm] = useState(sugestao);
+  const [form, setForm] = useState(podeVerValores ? sugestao : { ...sugestao, valor: 0 });
   const [aviso, setAviso] = useState("");
 
   const mudar = (novo: string) =>
@@ -101,8 +103,12 @@ export function AcoesSolicitacao({
               </div>
               <div className="grid gap-1.5">
                 <label className="rotulo text-[14px]">Valor fechado (R$)</label>
-                <input className="campo font-mono" type="number" min={0} value={form.valor}
-                       onChange={(e) => setForm({ ...form, valor: Number(e.target.value) })} />
+                {podeVerValores ? (
+                  <input className="campo font-mono" type="number" min={0} value={form.valor}
+                         onChange={(e) => setForm({ ...form, valor: Number(e.target.value) })} />
+                ) : (
+                  <input className="campo font-mono opacity-60" disabled placeholder="peça a um admin para preencher" />
+                )}
               </div>
               <div className="grid gap-1.5">
                 <label className="rotulo text-[14px]">Prazo (semanas)</label>

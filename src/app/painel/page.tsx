@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { criarClienteServidor } from "@/lib/supabase/servidor";
+import { criarClienteServidor, perfilAtual } from "@/lib/supabase/servidor";
 import { brl, relativo, dataCurta } from "@/lib/formato";
 
 const CORES: Record<string, string> = {
@@ -18,6 +18,8 @@ const ROTULOS: Record<string, string> = {
 };
 
 export default async function Painel() {
+  const perfil = await perfilAtual();
+  const podeVerValores = perfil?.papel === "admin" || !!perfil?.ve_valores;
   const sb = await criarClienteServidor();
 
   const [{ data: solicitacoes }, { data: projetos }] = await Promise.all([
@@ -38,12 +40,19 @@ export default async function Painel() {
         </div>
       </div>
 
-      <div className="mt-7 grid gap-3 sm:grid-cols-3">
-        {[
-          ["Novas para analisar", String(novas), novas > 0 ? "precisa de resposta" : "tudo em dia"],
-          ["Projetos em andamento", String(emAndamento), "com cliente ativo"],
-          ["Carteira fechada", brl(carteira), "soma dos projetos abertos"],
-        ].map(([r, v, o], i) => (
+      <div className={`mt-7 grid gap-3 ${podeVerValores ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+        {(
+          podeVerValores
+            ? [
+                ["Novas para analisar", String(novas), novas > 0 ? "precisa de resposta" : "tudo em dia"],
+                ["Projetos em andamento", String(emAndamento), "com cliente ativo"],
+                ["Carteira fechada", brl(carteira), "soma dos projetos abertos"],
+              ]
+            : [
+                ["Novas para analisar", String(novas), novas > 0 ? "precisa de resposta" : "tudo em dia"],
+                ["Projetos em andamento", String(emAndamento), "com cliente ativo"],
+              ]
+        ).map(([r, v, o], i) => (
           <div key={r} className={`cartao p-5 ${i === 0 && novas > 0 ? "bg-acento-fundo border-acento-borda" : ""}`}>
             <p className="font-mono text-[10.5px] tracking-widest uppercase text-suave">{r}</p>
             <p className={`mt-2 font-display font-bold text-[27px] tabular-nums ${i === 0 && novas > 0 ? "text-acento" : ""}`}>{v}</p>
@@ -61,7 +70,7 @@ export default async function Painel() {
           <table className="w-full text-[14px]">
             <thead>
               <tr className="border-b border-linha">
-                {["Código", "Cliente", "Tipo", "Estimativa", "Status", "Recebida"].map((h) => (
+                {["Código", "Cliente", "Tipo", ...(podeVerValores ? ["Estimativa"] : []), "Status", "Recebida"].map((h) => (
                   <th key={h} className="text-left font-mono text-[10.5px] tracking-widest uppercase text-suave font-medium px-4 py-3">{h}</th>
                 ))}
               </tr>
@@ -79,14 +88,16 @@ export default async function Painel() {
                       {s.empresa && <span className="block text-[12.5px] text-suave">{s.empresa}</span>}
                     </td>
                     <td className="px-4 py-3 text-tinta2">{String((s.respostas as Record<string, string>)?.tipo || "—")}</td>
-                    <td className="px-4 py-3 tabular-nums font-mono text-[12.5px]">
-                      {est?.total ? (
-                        <>
-                          {brl(est.total)}
-                          <span className="block text-suave">{est.semanas} sem</span>
-                        </>
-                      ) : "—"}
-                    </td>
+                    {podeVerValores && (
+                      <td className="px-4 py-3 tabular-nums font-mono text-[12.5px]">
+                        {est?.total ? (
+                          <>
+                            {brl(est.total)}
+                            <span className="block text-suave">{est.semanas} sem</span>
+                          </>
+                        ) : "—"}
+                      </td>
+                    )}
                     <td className="px-4 py-3">
                       <span className={`selo border ${CORES[s.status] ?? CORES.convertida}`}>{ROTULOS[s.status] ?? s.status}</span>
                     </td>
@@ -113,7 +124,8 @@ export default async function Painel() {
                   <div className="h-full bg-acento rounded-full" style={{ width: `${p.progresso}%` }} />
                 </div>
                 <p className="mt-3 text-[13px] text-suave">
-                  {p.valor_fechado ? brl(Number(p.valor_fechado)) : "sem valor definido"} · entrega {dataCurta(p.entrega_prevista)}
+                  {podeVerValores && p.valor_fechado ? `${brl(Number(p.valor_fechado))} · ` : ""}
+                  entrega {dataCurta(p.entrega_prevista)}
                 </p>
               </Link>
             ))}
