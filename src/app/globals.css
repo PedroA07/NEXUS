@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-papel: #f4f6fa;
+  --color-cartao: #ffffff;
+  --color-cartao2: #fafbfe;
+  --color-tinta: #131a26;
+  --color-tinta2: #3d4757;
+  --color-suave: #6b7688;
+  --color-linha: #dce3ed;
+  --color-linha2: #c2ccdb;
+  --color-acento: #2b4c8c;
+  --color-acento-forte: #1e3a6e;
+  --color-acento-fundo: #eaf0fb;
+  --color-acento-borda: #b9cbea;
+  --color-ambar: #8c6110;
+  --color-ambar-fundo: #fdf4e3;
+  --color-ambar-linha: #e8d5ac;
+  --color-ok: #1b6e4c;
+  --color-ok-fundo: #e6f3ec;
+  --color-erro: #a32b2b;
+  --color-erro-fundo: #fbecec;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--color-papel);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.025em; }
+  ::selection { background: var(--color-acento-fundo); }
+  :focus-visible { outline: 2px solid var(--color-acento); outline-offset: 3px; }
+}
+
+@layer components {
+  .cartao {
+    @apply bg-cartao border border-linha rounded-2xl shadow-[0_1px_2px_rgba(19,26,38,.05)];
+  }
+  .btn, .btn-p, .btn-s {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-[15px] transition-colors border border-transparent cursor-pointer;
+  }
+  .btn-p { @apply bg-acento text-white; }
+  .btn-p:hover { @apply bg-acento-forte; }
+  .btn-s { @apply bg-cartao text-tinta border-linha2; }
+  .btn-s:hover { @apply border-acento text-acento; }
+  .campo {
+    @apply w-full bg-cartao2 border border-linha2 rounded-xl px-3.5 py-2.5 text-base text-tinta
+           placeholder:text-suave/75 focus:border-acento focus:outline-none focus:ring-[3px] focus:ring-acento/20;
+  }
+  .rotulo { @apply block font-semibold text-base leading-snug text-tinta; }
+  .selo { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
+  .olho { @apply font-mono text-[11px] tracking-[0.16em] uppercase text-acento; }
+}
