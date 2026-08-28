@@ -49,7 +49,7 @@ export function FormularioBriefing() {
     return (
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {([
-          ["rapido", "5 a 7 minutos", "Versão rápida", "O essencial para eu entender a ideia e dar uma estimativa inicial de prazo e valor."],
+          ["rapido", "5 a 7 minutos", "Versão rápida", "O essencial para a gente entender a ideia e dar uma estimativa inicial de prazo e valor."],
           ["completo", "15 a 20 minutos", "Versão completa", "Todos os detalhes: funcionalidades, domínio, hospedagem, banco de dados, prazo e manutenção. Gera uma proposta bem mais precisa."],
         ] as const).map(([id, tempo, titulo, texto]) => (
           <button key={id} onClick={() => { setModo(id); guardar(id, dados); }}

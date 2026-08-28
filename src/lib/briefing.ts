@@ -18,7 +18,7 @@ export const SECOES: Secao[] = [
   {
     "id": "contato",
     "titulo": "Sobre você",
-    "resumo": "Pra eu saber com quem estou falando e como te responder.",
+    "resumo": "Pra a gente saber com quem está falando e como te responder.",
     "campos": [
       {
         "id": "nome",
@@ -66,7 +66,7 @@ export const SECOES: Secao[] = [
       },
       {
         "id": "comoConheceu",
-        "r": "Como você chegou até mim?",
+        "r": "Como você chegou até a gente?",
         "t": "escolha",
         "o": [
           "Indicação de alguém",
@@ -81,7 +81,7 @@ export const SECOES: Secao[] = [
   {
     "id": "projeto",
     "titulo": "O que você quer criar",
-    "resumo": "Aqui é onde você me conta a ideia. Escreva do seu jeito, sem se preocupar com termo técnico.",
+    "resumo": "Aqui é onde você nos conta a ideia. Escreva do seu jeito, sem se preocupar com termo técnico.",
     "campos": [
       {
         "id": "tipo",
@@ -162,7 +162,7 @@ export const SECOES: Secao[] = [
         "id": "sucesso",
         "r": "Como você vai saber que deu certo?",
         "t": "longo",
-        "a": "O resultado que você espera. Isso me ajuda a priorizar o que realmente importa.",
+        "a": "O resultado que você espera. Isso nos ajuda a priorizar o que realmente importa.",
         "ph": "Ex.: se eu parar de gastar 2 horas por dia com agendamento."
       },
       {
@@ -188,7 +188,7 @@ export const SECOES: Secao[] = [
         "id": "referencias",
         "r": "Sites ou apps parecidos que você gosta",
         "t": "longo",
-        "a": "Cole os links. Ver exemplos me ajuda muito a entender o estilo que você quer.",
+        "a": "Cole os links. Ver exemplos nos ajuda muito a entender o estilo que você quer.",
         "ph": "Ex.: gosto do jeito do site da clínica X e do app do iFood pra pedir."
       },
       {
@@ -331,7 +331,7 @@ export const SECOES: Secao[] = [
         "r": "Se só desse pra fazer 3 coisas, quais seriam?",
         "t": "longo",
         "rapido": 1,
-        "a": "Isso me permite montar uma primeira versão mais rápida e barata, e crescer depois.",
+        "a": "Isso nos permite montar uma primeira versão mais rápida e barata, e crescer depois.",
         "ph": "Ex.: 1) agendamento online 2) aviso no WhatsApp 3) lista de clientes."
       },
       {
@@ -467,10 +467,10 @@ export const SECOES: Secao[] = [
       },
       {
         "id": "materiais",
-        "r": "Já tem algum material pronto pra me mandar?",
+        "r": "Já tem algum material pronto pra nos mandar?",
         "t": "longo",
         "a": "Catálogo, tabela de preços, planilha de clientes, textos, contratos, prints do sistema atual.",
-        "ph": "Descreva aqui o que você tem. Depois me envie os arquivos."
+        "ph": "Descreva aqui o que você tem. Depois nos envie os arquivos."
       }
     ]
   },
@@ -478,7 +478,7 @@ export const SECOES: Secao[] = [
     "id": "tecnica",
     "titulo": "Quem cuida da parte técnica",
     "resumo": "Esta é a parte mais importante do formulário. Leia com calma — está tudo explicado.",
-    "nota": "Pra um site ou sistema ficar no ar, precisam existir três coisas: um <b>endereço</b> na internet (domínio), um <b>lugar onde ele mora</b> (hospedagem) e, quase sempre, um <b>lugar pra guardar as informações</b> (banco de dados). Cada uma tem um custo próprio, separado do valor do desenvolvimento. Aqui você me diz de quem é essa responsabilidade. <b>Se não souber, marque “não sei” — eu explico depois, com calma e sem pressa.</b>",
+    "nota": "Pra um site ou sistema ficar no ar, precisam existir três coisas: um <b>endereço</b> na internet (domínio), um <b>lugar onde ele mora</b> (hospedagem) e, quase sempre, um <b>lugar pra guardar as informações</b> (banco de dados). Cada uma tem um custo próprio, separado do valor do desenvolvimento. Aqui você nos diz de quem é essa responsabilidade. <b>Se não souber, marque “não sei” — a gente explica depois, com calma e sem pressa.</b>",
     "campos": [
       {
         "id": "dominio",
@@ -506,7 +506,7 @@ export const SECOES: Secao[] = [
           ],
           [
             "Não sei o que é domínio",
-            "Sem problema, eu explico."
+            "Sem problema, a gente explica."
           ]
         ]
       },
@@ -600,7 +600,7 @@ export const SECOES: Secao[] = [
       {
         "id": "lojas",
         "r": "Publicação nas lojas de aplicativo",
-        "i": "Publicar um aplicativo não é só terminar de programar. A Google e a Apple analisam o app antes de liberar, o que leva de dias a semanas, e cobram pra manter uma conta de desenvolvedor. Se a conta ficar no seu nome, o app é seu para sempre; se ficar no meu, você depende de mim para qualquer atualização.",
+        "i": "Publicar um aplicativo não é só terminar de programar. A Google e a Apple analisam o app antes de liberar, o que leva de dias a semanas, e cobram pra manter uma conta de desenvolvedor. Se a conta ficar no seu nome, o app é seu para sempre; se ficar na nossa, você depende da gente para qualquer atualização.",
         "t": "escolha",
         "a": "Só se você quiser um app instalável. A Google cobra uma taxa única (cerca de US$ 25) e a Apple cobra por ano (cerca de US$ 99) pra manter o app na loja.",
         "o": [
@@ -629,7 +629,7 @@ export const SECOES: Secao[] = [
       {
         "id": "custos",
         "r": "Sobre os custos que continuam depois de pronto",
-        "i": "Um sistema não é como um móvel, que você compra e acabou. Enquanto ele estiver no ar existem contas correndo todo mês: hospedagem, banco de dados, domínio, envio de mensagens, uso de inteligência artificial. Esses valores são dos fornecedores, não meus — mas é importante você saber que eles existem antes de começarmos.",
+        "i": "Um sistema não é como um móvel, que você compra e acabou. Enquanto ele estiver no ar existem contas correndo todo mês: hospedagem, banco de dados, domínio, envio de mensagens, uso de inteligência artificial. Esses valores são dos fornecedores, não nossos — mas é importante você saber que eles existem antes de começarmos.",
         "t": "escolha",
         "rapido": 1,
         "a": "Além do valor do desenvolvimento, serviços como hospedagem, domínio, e-mail e envio de mensagens são cobrados todo mês ou todo ano. Como você prefere lidar com isso?",
@@ -651,9 +651,9 @@ export const SECOES: Secao[] = [
       {
         "id": "acessos",
         "r": "As contas e serviços devem ficar no nome de quem?",
-        "i": "Contas no seu nome significa que você é o dono de tudo: se um dia quiser trocar de desenvolvedor, é só passar o acesso. Contas no meu nome ficam mais práticas no dia a dia, mas você passa a depender de mim para qualquer mudança. Costumo recomendar o seu nome, com acesso liberado pra mim trabalhar.",
+        "i": "Contas no seu nome significa que você é o dono de tudo: se um dia quiser trocar de desenvolvedor, é só passar o acesso. Contas no nosso nome ficam mais práticas no dia a dia, mas você passa a depender da gente para qualquer mudança. Costumamos recomendar o seu nome, com acesso liberado pra gente trabalhar.",
         "t": "escolha",
-        "a": "Costumo recomendar que fiquem no seu nome: assim você nunca depende de ninguém pra ter acesso.",
+        "a": "Costumamos recomendar que fiquem no seu nome: assim você nunca depende de ninguém pra ter acesso.",
         "o": [
           "No meu nome",
           "No seu nome, e você administra",
@@ -664,7 +664,7 @@ export const SECOES: Secao[] = [
       {
         "id": "codigo",
         "r": "Você quer receber o código-fonte no final?",
-        "i": "O código-fonte é o texto que eu escrevo e que vira o sistema funcionando. Receber ele significa que qualquer outro programador consegue continuar o trabalho no futuro sem refazer do zero. Nem todo contrato de software inclui isso — por isso a pergunta aparece aqui, e não depois.",
+        "i": "O código-fonte é o texto que a gente escreve e que vira o sistema funcionando. Receber ele significa que qualquer outro programador consegue continuar o trabalho no futuro sem refazer do zero. Nem todo contrato de software inclui isso — por isso a pergunta aparece aqui, e não depois.",
         "t": "escolha",
         "a": "Código-fonte é a receita do sistema. Com ele, qualquer programador consegue dar manutenção no futuro.",
         "o": [
@@ -679,9 +679,9 @@ export const SECOES: Secao[] = [
         "rapido": 1,
         "r": "Importante: de quem é a responsabilidade",
         "p": [
-          "Tudo que você escolher manter por sua conta — domínio, hospedagem, banco de dados, contas de serviço, senhas — continua sendo responsabilidade sua. Se o site sair do ar porque o domínio venceu, porque a hospedagem foi suspensa por falta de pagamento, porque a senha se perdeu ou porque o fornecedor mudou as regras, isso não entra na garantia do desenvolvimento. Eu ajudo a resolver, mas como atendimento avulso, cobrado à parte.",
-          "Se eu ficar responsável por alguma dessas partes, ela vira um serviço contratado e tem custo: você paga o valor do fornecedor (hospedagem, domínio, banco de dados, APIs, inteligência artificial) mais uma taxa de gestão pela minha responsabilidade de manter aquilo no ar, renovar, acompanhar e resolver quando der problema. Mesmo cuidando de só uma parte, essa parte é cobrada.",
-          "Tudo isso vai discriminado no orçamento, linha por linha, com o que é meu e o que é de fornecedor. Nada aparece depois como surpresa."
+          "Tudo que você escolher manter por sua conta — domínio, hospedagem, banco de dados, contas de serviço, senhas — continua sendo responsabilidade sua. Se o site sair do ar porque o domínio venceu, porque a hospedagem foi suspensa por falta de pagamento, porque a senha se perdeu ou porque o fornecedor mudou as regras, isso não entra na garantia do desenvolvimento. A gente ajuda a resolver, mas como atendimento avulso, cobrado à parte.",
+          "Se a gente ficar responsável por alguma dessas partes, ela vira um serviço contratado e tem custo: você paga o valor do fornecedor (hospedagem, domínio, banco de dados, APIs, inteligência artificial) mais uma taxa de gestão pela nossa responsabilidade de manter aquilo no ar, renovar, acompanhar e resolver quando der problema. Mesmo cuidando de só uma parte, essa parte é cobrada.",
+          "Tudo isso vai discriminado no orçamento, linha por linha, com o que é nosso e o que é de fornecedor. Nada aparece depois como surpresa."
         ]
       },
       {
@@ -824,7 +824,7 @@ export const SECOES: Secao[] = [
         "id": "sigilo",
         "r": "Precisa de contrato de confidencialidade (NDA)?",
         "t": "escolha",
-        "a": "É o documento em que eu me comprometo a não divulgar nada sobre o seu projeto.",
+        "a": "É o documento em que a gente se compromete a não divulgar nada sobre o seu projeto.",
         "o": [
           "Sim",
           "Não",
@@ -862,10 +862,10 @@ export const SECOES: Secao[] = [
       {
         "id": "orcamento",
         "r": "Que faixa de investimento você tem em mente?",
-        "i": "Não existe preço de tabela em software porque cada projeto é diferente. O que muda o valor é a quantidade de telas, as funcionalidades, as integrações com outros serviços e o prazo. Saber a sua faixa me permite propor uma versão que caiba nela, em vez de simplesmente dizer que não dá.",
+        "i": "Não existe preço de tabela em software porque cada projeto é diferente. O que muda o valor é a quantidade de telas, as funcionalidades, as integrações com outros serviços e o prazo. Saber a sua faixa nos permite propor uma versão que caiba nela, em vez de simplesmente dizer que não dá.",
         "t": "escolha",
         "rapido": 1,
-        "a": "Não é compromisso e não encarece nada. Saber a faixa me ajuda a propor algo que caiba no seu bolso, em vez de mandar um orçamento fora da realidade.",
+        "a": "Não é compromisso e não encarece nada. Saber a faixa nos ajuda a propor algo que caiba no seu bolso, em vez de mandar um orçamento fora da realidade.",
         "o": [
           "Até R$ 2.000",
           "De R$ 2.000 a R$ 5.000",
@@ -914,8 +914,8 @@ export const SECOES: Secao[] = [
         "rapido": 1,
         "r": "Como o prazo é contado",
         "p": [
-          "O prazo não começa a correr quando você envia este formulário. Primeiro eu analiso o briefing; se o projeto for aprovado, entro em contato e marcamos uma conversa para levantar os requisitos, as especificações e o escopo em detalhe.",
-          "É nessa conversa que o prazo e o valor reais são definidos e colocados por escrito. Tudo que for falado antes disso — inclusive qualquer estimativa que eu passe por mensagem — é aproximação, e serve só para você saber se vale a pena seguir."
+          "O prazo não começa a correr quando você envia este formulário. Primeiro a gente analisa o briefing; se o projeto for aprovado, entramos em contato e marcamos uma conversa para levantar os requisitos, as especificações e o escopo em detalhe.",
+          "É nessa conversa que o prazo e o valor reais são definidos e colocados por escrito. Tudo que for falado antes disso — inclusive qualquer estimativa que a gente passe por mensagem — é aproximação, e serve só para você saber se vale a pena seguir."
         ]
       }
     ]
@@ -927,7 +927,7 @@ export const SECOES: Secao[] = [
     "campos": [
       {
         "id": "manutencao",
-        "r": "Quer que eu continue responsável depois da entrega?",
+        "r": "Quer que a gente continue responsável depois da entrega?",
         "i": "Software não fica parado no tempo: navegadores mudam, celulares atualizam, regras de segurança mudam e serviços que o sistema usa saem do ar. Manutenção é o trabalho de acompanhar isso e corrigir antes de virar problema. Sem ninguém cuidando, um sistema que funciona hoje costuma apresentar defeito em alguns meses.",
         "t": "escolha",
         "rapido": 1,

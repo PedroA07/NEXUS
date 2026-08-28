@@ -56,7 +56,7 @@ export default async function Projetos() {
         <div className="mt-14 cartao p-8 bg-acento-fundo border-acento-borda">
           <h2 className="text-xl font-bold">Quer algo parecido para o seu negócio?</h2>
           <p className="mt-2 text-[15px] text-tinta2 max-w-xl leading-relaxed">
-            Conte o que precisa no briefing e eu retorno dizendo se é viável, quanto custa e quanto leva.
+            Conte o que precisa no briefing e a gente retorna dizendo se é viável, quanto custa e quanto leva.
           </p>
           <Link href="/solicitar" className="btn-p mt-5">Solicitar orçamento</Link>
         </div>

@@ -42,7 +42,7 @@ export default async function Portal() {
       <main className="max-w-4xl mx-auto px-5 py-10">
         <h1 className="text-3xl font-bold">Olá, {(perfil.nome || "").split(" ")[0] || "tudo bem?"}</h1>
         <p className="mt-2 text-[16px] text-tinta2 leading-relaxed">
-          Aqui você acompanha o andamento de cada projeto e fala direto comigo.
+          Aqui você acompanha o andamento de cada projeto e fala direto com a gente.
         </p>
 
         {!projetos?.length ? (

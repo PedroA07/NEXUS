@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   description:
     "Sites, sistemas, aplicativos e automações sob medida. Do briefing à entrega, com acompanhamento em tempo real.",
   openGraph: { type: "website", locale: "pt_BR", siteName: "Nexus" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0d13",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:ital,wght@0,300..700;1,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Public+Sans:ital,wght@0,300..700;1,400&display=swap"
         />
       </head>
       <body>{children}</body>

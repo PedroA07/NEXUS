@@ -196,7 +196,7 @@ export async function abrirProjeto(
   await sb.from("atualizacoes").insert({
     projeto_id: projeto.id,
     titulo: "Projeto aberto",
-    corpo: "Bem-vindo! A partir daqui você acompanha cada etapa por esta página e pode falar comigo pelo chat.",
+    corpo: "Bem-vindo! A partir daqui você acompanha cada etapa por esta página e pode falar com a gente pelo chat.",
     fase: "Descoberta e escopo",
     progresso: 0,
   });

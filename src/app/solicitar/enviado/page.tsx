@@ -5,8 +5,8 @@ import { Rodape } from "@/components/rodape";
 export const metadata = { title: "Briefing recebido" };
 
 const PASSOS: [string, string][] = [
-  ["Análise do briefing", "Leio tudo com calma e verifico se dá para fazer do jeito que você imaginou, no prazo e no orçamento indicados."],
-  ["Retorno", "Se fizer sentido para os dois lados, entro em contato pelo WhatsApp ou e-mail que você deixou."],
+  ["Análise do briefing", "Lemos tudo com calma e verificamos se dá para fazer do jeito que você imaginou, no prazo e no orçamento indicados."],
+  ["Retorno", "Se fizer sentido para os dois lados, entramos em contato pelo WhatsApp ou e-mail que você deixou."],
   ["Conversa de levantamento", "Detalhamos requisitos, especificações e escopo — é onde as ideias viram uma lista concreta do que será feito."],
   ["Proposta com os valores reais", "Só depois desse levantamento é que prazo e valor definitivos são fechados, por escrito. Qualquer número citado antes disso é estimativa."],
 ];
@@ -51,7 +51,7 @@ export default async function Enviado({
           <h2 className="text-lg font-bold">E depois que o projeto começar?</h2>
           <p className="mt-2 text-[15px] text-tinta2 leading-relaxed">
             Você recebe um convite por e-mail para a área do cliente, onde acompanha as
-            atualizações do projeto e fala comigo pelo chat, sem precisar caçar mensagem no WhatsApp.
+            atualizações do projeto e fala com a gente pelo chat, sem precisar caçar mensagem no WhatsApp.
           </p>
         </div>
 

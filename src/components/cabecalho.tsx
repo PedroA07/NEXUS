@@ -13,6 +13,7 @@ export async function Cabecalho() {
         <nav className="hidden sm:flex items-center gap-5 text-[14.5px] text-tinta2">
           <Link href="/projetos" className="hover:text-acento">Projetos</Link>
           <Link href="/#servicos" className="hover:text-acento">Serviços</Link>
+          <Link href="/#quem-somos" className="hover:text-acento">Quem somos</Link>
           <Link href="/#processo" className="hover:text-acento">Como funciona</Link>
         </nav>
         <div className="flex-1" />
