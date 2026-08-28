@@ -27,7 +27,9 @@ export default async function PainelLayout({ children }: { children: React.React
             <Link href="/" className="hover:text-acento">Ver o site</Link>
           </nav>
           <div className="flex-1" />
-          <span className="hidden sm:block text-[13.5px] text-suave">{perfil.nome || perfil.email}</span>
+          <Link href="/conta" className="hidden sm:block text-[13.5px] text-suave hover:text-acento">
+            {perfil.nome || perfil.email}
+          </Link>
           <form action={sair}>
             <button className="text-[14px] text-suave hover:text-erro">Sair</button>
           </form>

@@ -310,6 +310,32 @@ export async function removerAcessoEquipe(perfilId: string): Promise<Resultado> 
   return { ok: true };
 }
 
+export async function atualizarPerfil(dados: {
+  nome: string; telefone: string; empresa: string;
+}): Promise<Resultado> {
+  const perfil = await perfilAtual();
+  if (!perfil) return { ok: false, msg: "Entre para editar seus dados." };
+
+  const nome = dados.nome.trim();
+  if (!nome) return { ok: false, msg: "Nome é obrigatório." };
+
+  const sb = await criarClienteServidor();
+  const { error } = await sb
+    .from("perfis")
+    .update({
+      nome,
+      telefone: dados.telefone.trim() || null,
+      empresa: dados.empresa.trim() || null,
+    })
+    .eq("id", perfil.id);
+  if (error) return { ok: false, msg: error.message };
+
+  revalidatePath("/conta");
+  revalidatePath("/painel");
+  revalidatePath("/portal");
+  return { ok: true, msg: "Dados atualizados." };
+}
+
 /* ------------------------------------------------------------------ */
 /* chat                                                                */
 /* ------------------------------------------------------------------ */

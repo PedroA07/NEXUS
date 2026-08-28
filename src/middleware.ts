@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
   // Renova a sessão em toda navegação.
   const { data: { user } } = await supabase.auth.getUser();
 
-  const protegida = ["/painel", "/portal"].some((p) => request.nextUrl.pathname.startsWith(p));
+  const protegida = ["/painel", "/portal", "/conta"].some((p) => request.nextUrl.pathname.startsWith(p));
   if (protegida && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/entrar";
