@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Nexus — desenvolvimento de software", template: "%s · Nexus" },
+  title: { default: "Nexus, desenvolvimento de software", template: "%s · Nexus" },
   description:
     "Sites, sistemas, aplicativos e automações sob medida. Do briefing à entrega, com acompanhamento em tempo real.",
   openGraph: { type: "website", locale: "pt_BR", siteName: "Nexus" },

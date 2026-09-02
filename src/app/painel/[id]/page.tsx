@@ -63,15 +63,15 @@ export default async function DetalheSolicitacao({
         <section className="cartao p-6 mt-7">
           <h2 className="text-xl font-bold">Estimativa automática</h2>
           <p className="mt-1 text-[13.5px] text-suave">
-            Calculada a partir das respostas, com os parâmetros padrão. Serve para triagem —
-            o valor real sai depois do levantamento.
+            Calculada a partir das respostas, com os parâmetros padrão. Serve para triagem.
+            O valor real sai depois do levantamento.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-4">
             {[
               ["Esforço", `${est.horas} h`, `${est.gerencia}h de gestão · ${est.buffer}h de buffer`],
               ["Prazo", `${est.semanas} sem`, `entrega ~ ${dataCurta(est.entrega)}`],
-              ["Valor", brl(est.total), `faixa ${brl(est.minimo)}–${brl(est.maximo)}`],
+              ["Valor", brl(est.total), `faixa ${brl(est.minimo)}-${brl(est.maximo)}`],
               ["Recorrente", brl2(est.recorrenteMes), "por mês, depois do 1º ano"],
             ].map(([r, v, o], i) => (
               <div key={r} className={`rounded-xl p-4 border ${i === 2 ? "bg-acento-fundo border-acento-borda" : "bg-cartao2 border-linha"}`}>
@@ -140,7 +140,7 @@ export default async function DetalheSolicitacao({
         observacoes={s.observacoes_internas ?? ""}
         podeVerValores={podeVerValores}
         sugestao={{
-          nome: `${String(respostas.tipo || "Projeto")} — ${s.empresa || s.nome}`,
+          nome: `${String(respostas.tipo || "Projeto")} - ${s.empresa || s.nome}`,
           valor: podeVerValores && est ? Math.round(est.total) : 0,
           prazoSemanas: est?.semanas ?? 8,
           inicio: est?.inicio ?? "",

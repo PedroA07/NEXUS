@@ -5,7 +5,7 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 
 const SERVICOS = [
   { t: "Sites e páginas de venda", d: "Da vitrine institucional à página feita para converter, com texto, layout e medição de resultado." },
-  { t: "Sistemas sob medida", d: "Cadastros, pedidos, agendamento, relatórios — o que hoje vive numa planilha vira um sistema com login e histórico." },
+  { t: "Sistemas sob medida", d: "Cadastros, pedidos, agendamento, relatórios: o que hoje vive numa planilha vira um sistema com login e histórico." },
   { t: "Aplicativos", d: "Android e iPhone a partir de uma base só, publicados nas lojas e prontos para atualizar." },
   { t: "Automações e bots", d: "Aquela tarefa repetitiva que consome sua semana passa a acontecer sozinha." },
   { t: "Dados e relatórios", d: "Os números do negócio em um painel só, atualizados sem ninguém montar planilha." },
@@ -85,7 +85,7 @@ export default async function Home() {
             </p>
             <p>
               Por trás dela está o <a href="https://github.com/PedroA07" target="_blank" rel="noreferrer" className="text-tinta font-semibold hover:text-acento-forte">Pedro Andrade</a>,
-              e a equipe cresce projeto a projeto, conforme o que cada trabalho pede — sem inflar
+              e a equipe cresce projeto a projeto, conforme o que cada trabalho pede, sem inflar
               quadro nem terceirizar sem avisar. O <Link href="/projetos" className="text-acento-forte font-semibold hover:underline">portfólio</Link> mostra
               essa amplitude: de aplicativos autorais a sistemas internos de gestão, sempre com o mesmo cuidado.
             </p>
@@ -154,7 +154,7 @@ export default async function Home() {
             </h2>
             <p className="mt-3 text-[15.5px] text-tinta2 max-w-2xl leading-relaxed">
               O briefing foi escrito para quem não é da área. Onde a pergunta for técnica,
-              existe sempre a opção “não sei” — e a gente explica depois, com calma.
+              existe sempre a opção “não sei”, e a gente explica depois, com calma.
             </p>
             <Link href="/solicitar" className="btn-p mt-6">Preencher o briefing</Link>
           </div>

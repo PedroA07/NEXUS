@@ -89,7 +89,7 @@ export const SECOES: Secao[] = [
         "t": "escolha",
         "req": 1,
         "rapido": 1,
-        "a": "Se ficar em dúvida entre dois, marque o que parece mais próximo — a gente ajusta conversando.",
+        "a": "Se ficar em dúvida entre dois, marque o que parece mais próximo, a gente ajusta conversando.",
         "o": [
           [
             "Site institucional",
@@ -132,7 +132,7 @@ export const SECOES: Secao[] = [
             "Chatbot, análise automática, recomendação."
           ],
           [
-            "Ainda não sei — preciso de ajuda pra decidir",
+            "Ainda não sei, preciso de ajuda pra decidir",
             ""
           ],
           [
@@ -218,7 +218,7 @@ export const SECOES: Secao[] = [
   {
     "id": "funcoes",
     "titulo": "O que o sistema precisa fazer",
-    "resumo": "Marque tudo que você imagina que vai precisar. Marcar demais não é problema — a gente corta depois.",
+    "resumo": "Marque tudo que você imagina que vai precisar. Marcar demais não é problema, a gente corta depois.",
     "campos": [
       {
         "id": "funcionalidades",
@@ -315,7 +315,7 @@ export const SECOES: Secao[] = [
             ""
           ],
           [
-            "Ainda não sei — me ajude a definir",
+            "Ainda não sei, me ajude a definir",
             ""
           ]
         ]
@@ -382,7 +382,7 @@ export const SECOES: Secao[] = [
             ""
           ],
           [
-            "Não sei — o que você recomenda?",
+            "Não sei, o que você recomenda?",
             ""
           ]
         ]
@@ -404,7 +404,7 @@ export const SECOES: Secao[] = [
   {
     "id": "visual",
     "titulo": "Visual e conteúdo",
-    "resumo": "Quem entrega logo, textos e fotos — você, eu, ou os dois.",
+    "resumo": "Quem entrega logo, textos e fotos: você, a gente, ou os dois.",
     "campos": [
       {
         "id": "logo",
@@ -413,7 +413,7 @@ export const SECOES: Secao[] = [
         "o": [
           "Sim, tenho os arquivos e mando pra você",
           "Tenho, mas quero melhorar",
-          "Não tenho — quero que você crie",
+          "Não tenho, quero que você crie",
           "Não sei se o que eu tenho serve"
         ]
       },
@@ -440,7 +440,7 @@ export const SECOES: Secao[] = [
           "Divertido e informal",
           "Sofisticado e elegante",
           "Parecido com um site que já vi",
-          "Não sei — confio na sua sugestão"
+          "Não sei, confio na sua sugestão"
         ]
       },
       {
@@ -477,13 +477,13 @@ export const SECOES: Secao[] = [
   {
     "id": "tecnica",
     "titulo": "Quem cuida da parte técnica",
-    "resumo": "Esta é a parte mais importante do formulário. Leia com calma — está tudo explicado.",
-    "nota": "Pra um site ou sistema ficar no ar, precisam existir três coisas: um <b>endereço</b> na internet (domínio), um <b>lugar onde ele mora</b> (hospedagem) e, quase sempre, um <b>lugar pra guardar as informações</b> (banco de dados). Cada uma tem um custo próprio, separado do valor do desenvolvimento. Aqui você nos diz de quem é essa responsabilidade. <b>Se não souber, marque “não sei” — a gente explica depois, com calma e sem pressa.</b>",
+    "resumo": "Esta é a parte mais importante do formulário. Leia com calma, está tudo explicado.",
+    "nota": "Pra um site ou sistema ficar no ar, precisam existir três coisas: um <b>endereço</b> na internet (domínio), um <b>lugar onde ele mora</b> (hospedagem) e, quase sempre, um <b>lugar pra guardar as informações</b> (banco de dados). Cada uma tem um custo próprio, separado do valor do desenvolvimento. Aqui você nos diz de quem é essa responsabilidade. <b>Se não souber, marque “não sei”, a gente explica depois, com calma e sem pressa.</b>",
     "campos": [
       {
         "id": "dominio",
-        "r": "Domínio — o endereço do seu site",
-        "i": "Pense no domínio como o endereço da sua loja. Ele é alugado, não comprado: você paga uma taxa todo ano pra continuar com ele. Se a renovação não for paga, o endereço fica livre pra qualquer pessoa registrar — e o site sai do ar junto. Endereços .com.br são registrados no Registro.br; .com em empresas como GoDaddy ou Cloudflare.",
+        "r": "Domínio: o endereço do seu site",
+        "i": "Pense no domínio como o endereço da sua loja. Ele é alugado, não comprado: você paga uma taxa todo ano pra continuar com ele. Se a renovação não for paga, o endereço fica livre pra qualquer pessoa registrar, e o site sai do ar junto. Endereços .com.br são registrados no Registro.br; .com em empresas como GoDaddy ou Cloudflare.",
         "t": "escolha",
         "rapido": 1,
         "a": "É o que a pessoa digita pra te achar, tipo suaempresa.com.br. Custa em média R$ 40 a R$ 120 por ano, pago uma vez ao ano.",
@@ -497,11 +497,11 @@ export const SECOES: Secao[] = [
             "Você renova e configura por mim."
           ],
           [
-            "Não tenho — quero que você registre e cuide de tudo",
+            "Não tenho, quero que você registre e cuide de tudo",
             ""
           ],
           [
-            "Não tenho — quero registrar no meu nome, com você me orientando",
+            "Não tenho, quero registrar no meu nome, com você me orientando",
             ""
           ],
           [
@@ -518,7 +518,7 @@ export const SECOES: Secao[] = [
       },
       {
         "id": "hospedagem",
-        "r": "Hospedagem — onde o sistema fica ligado",
+        "r": "Hospedagem: onde o sistema fica ligado",
         "i": "A hospedagem é o computador que fica ligado 24 horas por dia guardando o seu sistema e entregando ele pra quem acessa. Sem ela, o sistema simplesmente não existe na internet. O preço varia com o tamanho: um site simples roda em algo barato; um sistema com muitos usuários, fotos e movimento precisa de mais força e custa mais.",
         "t": "escolha",
         "rapido": 1,
@@ -548,11 +548,11 @@ export const SECOES: Secao[] = [
       },
       {
         "id": "banco",
-        "r": "Banco de dados — onde ficam guardadas as informações",
-        "i": "O banco de dados é o arquivo organizado do sistema: clientes, pedidos, mensagens, histórico — tudo que precisa continuar existindo depois que a página fecha. Ele fica separado do site, tem custo próprio e precisa de backup. Um site que só mostra informação pode não precisar; qualquer coisa com cadastro, login ou histórico precisa.",
+        "r": "Banco de dados: onde ficam guardadas as informações",
+        "i": "O banco de dados é o arquivo organizado do sistema: clientes, pedidos, mensagens, histórico, tudo que precisa continuar existindo depois que a página fecha. Ele fica separado do site, tem custo próprio e precisa de backup. Um site que só mostra informação pode não precisar; qualquer coisa com cadastro, login ou histórico precisa.",
         "t": "escolha",
         "rapido": 1,
-        "a": "É onde ficam salvos cadastros, pedidos, mensagens e histórico — tudo que o sistema precisa lembrar. Se tem login, cadastro ou histórico, vai precisar de um.",
+        "a": "É onde ficam salvos cadastros, pedidos, mensagens e histórico, tudo que o sistema precisa lembrar. Se tem login, cadastro ou histórico, vai precisar de um.",
         "o": [
           [
             "Sim, quero que você cuide do banco de dados",
@@ -575,13 +575,13 @@ export const SECOES: Secao[] = [
       {
         "id": "backup",
         "r": "Quem fica responsável pelo backup?",
-        "i": "Backup é uma cópia dos seus dados guardada em outro lugar, feita automaticamente todo dia. Serve pra quando algo dá errado: alguém apagou sem querer, o servidor falhou, houve invasão. Sem backup, dado perdido é dado perdido — não existe como recuperar depois.",
+        "i": "Backup é uma cópia dos seus dados guardada em outro lugar, feita automaticamente todo dia. Serve pra quando algo dá errado: alguém apagou sem querer, o servidor falhou, houve invasão. Sem backup, dado perdido é dado perdido, não existe como recuperar depois.",
         "t": "escolha",
         "a": "Backup é a cópia de segurança. Se algo der errado, é ela que salva os dados.",
         "o": [
-          "Você — quero backup automático",
+          "Você: quero backup automático",
           "Minha equipe cuida disso",
-          "Não sei — o que você recomenda?"
+          "Não sei, o que você recomenda?"
         ]
       },
       {
@@ -617,7 +617,7 @@ export const SECOES: Secao[] = [
             ""
           ],
           [
-            "Não se aplica — não vai ter app",
+            "Não se aplica, não vai ter app",
             ""
           ],
           [
@@ -629,21 +629,21 @@ export const SECOES: Secao[] = [
       {
         "id": "custos",
         "r": "Sobre os custos que continuam depois de pronto",
-        "i": "Um sistema não é como um móvel, que você compra e acabou. Enquanto ele estiver no ar existem contas correndo todo mês: hospedagem, banco de dados, domínio, envio de mensagens, uso de inteligência artificial. Esses valores são dos fornecedores, não nossos — mas é importante você saber que eles existem antes de começarmos.",
+        "i": "Um sistema não é como um móvel, que você compra e acabou. Enquanto ele estiver no ar existem contas correndo todo mês: hospedagem, banco de dados, domínio, envio de mensagens, uso de inteligência artificial. Esses valores são dos fornecedores, não nossos, mas é importante você saber que eles existem antes de começarmos.",
         "t": "escolha",
         "rapido": 1,
         "a": "Além do valor do desenvolvimento, serviços como hospedagem, domínio, e-mail e envio de mensagens são cobrados todo mês ou todo ano. Como você prefere lidar com isso?",
         "o": [
           [
-            "Entendo — prefiro pagar direto aos fornecedores",
+            "Entendo, prefiro pagar direto aos fornecedores",
             ""
           ],
           [
-            "Entendo — prefiro que você pague e me cobre tudo junto",
+            "Entendo, prefiro que você pague e me cobre tudo junto",
             ""
           ],
           [
-            "Não sabia disso — me explique os custos antes",
+            "Não sabia disso, me explique os custos antes",
             ""
           ]
         ]
@@ -664,7 +664,7 @@ export const SECOES: Secao[] = [
       {
         "id": "codigo",
         "r": "Você quer receber o código-fonte no final?",
-        "i": "O código-fonte é o texto que a gente escreve e que vira o sistema funcionando. Receber ele significa que qualquer outro programador consegue continuar o trabalho no futuro sem refazer do zero. Nem todo contrato de software inclui isso — por isso a pergunta aparece aqui, e não depois.",
+        "i": "O código-fonte é o texto que a gente escreve e que vira o sistema funcionando. Receber ele significa que qualquer outro programador consegue continuar o trabalho no futuro sem refazer do zero. Nem todo contrato de software inclui isso, por isso a pergunta aparece aqui, e não depois.",
         "t": "escolha",
         "a": "Código-fonte é a receita do sistema. Com ele, qualquer programador consegue dar manutenção no futuro.",
         "o": [
@@ -679,7 +679,7 @@ export const SECOES: Secao[] = [
         "rapido": 1,
         "r": "Importante: de quem é a responsabilidade",
         "p": [
-          "Tudo que você escolher manter por sua conta — domínio, hospedagem, banco de dados, contas de serviço, senhas — continua sendo responsabilidade sua. Se o site sair do ar porque o domínio venceu, porque a hospedagem foi suspensa por falta de pagamento, porque a senha se perdeu ou porque o fornecedor mudou as regras, isso não entra na garantia do desenvolvimento. A gente ajuda a resolver, mas como atendimento avulso, cobrado à parte.",
+          "Tudo que você escolher manter por sua conta (domínio, hospedagem, banco de dados, contas de serviço, senhas) continua sendo responsabilidade sua. Se o site sair do ar porque o domínio venceu, porque a hospedagem foi suspensa por falta de pagamento, porque a senha se perdeu ou porque o fornecedor mudou as regras, isso não entra na garantia do desenvolvimento. A gente ajuda a resolver, mas como atendimento avulso, cobrado à parte.",
           "Se a gente ficar responsável por alguma dessas partes, ela vira um serviço contratado e tem custo: você paga o valor do fornecedor (hospedagem, domínio, banco de dados, APIs, inteligência artificial) mais uma taxa de gestão pela nossa responsabilidade de manter aquilo no ar, renovar, acompanhar e resolver quando der problema. Mesmo cuidando de só uma parte, essa parte é cobrada.",
           "Tudo isso vai discriminado no orçamento, linha por linha, com o que é nosso e o que é de fornecedor. Nada aparece depois como surpresa."
         ]
@@ -690,7 +690,7 @@ export const SECOES: Secao[] = [
         "t": "multipla",
         "req": 1,
         "rapido": 1,
-        "a": "Marque para confirmar que você leu e entendeu os dois pontos acima. Isso não é contrato — é só para começarmos alinhados.",
+        "a": "Marque para confirmar que você leu e entendeu os dois pontos acima. Isso não é contrato, é só para começarmos alinhados.",
         "o": [
           [
             "Li e entendi",
@@ -708,7 +708,7 @@ export const SECOES: Secao[] = [
       {
         "id": "pagamentos",
         "r": "Vai receber pagamento pelo sistema?",
-        "i": "Receber pagamento pela internet envolve uma empresa intermediária, como Mercado Pago, PagBank ou Stripe. Elas cobram uma porcentagem de cada venda — normalmente entre 1% e 5%, dependendo da forma de pagamento — e esse valor sai do que você recebe, não do orçamento do sistema.",
+        "i": "Receber pagamento pela internet envolve uma empresa intermediária, como Mercado Pago, PagBank ou Stripe. Elas cobram uma porcentagem de cada venda (normalmente entre 1% e 5%, dependendo da forma de pagamento) e esse valor sai do que você recebe, não do orçamento do sistema.",
         "t": "multipla",
         "o": [
           "Pix",
@@ -844,7 +844,7 @@ export const SECOES: Secao[] = [
         "t": "escolha",
         "rapido": 1,
         "o": [
-          "O quanto antes — é urgente",
+          "O quanto antes, é urgente",
           "Em até 1 mês",
           "De 1 a 3 meses",
           "De 3 a 6 meses",
@@ -872,7 +872,7 @@ export const SECOES: Secao[] = [
           "De R$ 5.000 a R$ 15.000",
           "De R$ 15.000 a R$ 40.000",
           "Acima de R$ 40.000",
-          "Ainda não sei — quero uma estimativa sua"
+          "Ainda não sei, quero uma estimativa sua"
         ]
       },
       {
@@ -915,7 +915,7 @@ export const SECOES: Secao[] = [
         "r": "Como o prazo é contado",
         "p": [
           "O prazo não começa a correr quando você envia este formulário. Primeiro a gente analisa o briefing; se o projeto for aprovado, entramos em contato e marcamos uma conversa para levantar os requisitos, as especificações e o escopo em detalhe.",
-          "É nessa conversa que o prazo e o valor reais são definidos e colocados por escrito. Tudo que for falado antes disso — inclusive qualquer estimativa que a gente passe por mensagem — é aproximação, e serve só para você saber se vale a pena seguir."
+          "É nessa conversa que o prazo e o valor reais são definidos e colocados por escrito. Tudo que for falado antes disso (inclusive qualquer estimativa que a gente passe por mensagem) é aproximação, e serve só para você saber se vale a pena seguir."
         ]
       }
     ]
@@ -946,7 +946,7 @@ export const SECOES: Secao[] = [
             ""
           ],
           [
-            "Não sei — me explique as opções",
+            "Não sei, me explique as opções",
             ""
           ]
         ]
@@ -956,7 +956,7 @@ export const SECOES: Secao[] = [
         "r": "Quem vai mexer no conteúdo no dia a dia?",
         "t": "escolha",
         "o": [
-          "Eu ou minha equipe — quero um painel simples pra isso",
+          "Eu ou minha equipe, quero um painel simples pra isso",
           "Prefiro te pedir sempre que precisar",
           "Quase nada vai mudar",
           "Não sei"

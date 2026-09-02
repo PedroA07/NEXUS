@@ -45,7 +45,7 @@ export function Equipe({ membros, idAtual }: { membros: Membro[]; idAtual: strin
           <tbody>
             {membros.map((m) => (
               <tr key={m.id} className="border-b border-linha last:border-0">
-                <td className="px-4 py-3 font-semibold">{m.nome || "—"}</td>
+                <td className="px-4 py-3 font-semibold">{m.nome || "-"}</td>
                 <td className="px-4 py-3 text-tinta2">{m.email}</td>
                 <td className="px-4 py-3">{ROTULO_PAPEL[m.papel] ?? m.papel}</td>
                 <td className="px-4 py-3">{m.papel === "admin" || m.ve_valores ? "Sim" : "Não"}</td>

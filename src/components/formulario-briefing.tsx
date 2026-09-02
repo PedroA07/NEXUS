@@ -218,7 +218,7 @@ export function FormularioBriefing() {
         <button onClick={() => setModo(null)} className="btn-s">Voltar ao início</button>
       </div>
       <p className="mt-8 pt-5 border-t border-linha text-[13.5px] text-suave leading-relaxed">
-        O que você escrever aqui é usado só para montar a sua proposta. Pode responder em partes —
+        O que você escrever aqui é usado só para montar a sua proposta. Pode responder em partes:
         o rascunho fica salvo neste navegador.
       </p>
     </>

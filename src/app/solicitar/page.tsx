@@ -15,12 +15,12 @@ export default function Solicitar() {
         </h1>
         <p className="mt-4 text-[17px] text-tinta2 leading-relaxed">
           Antes de passar um orçamento, precisamos entender bem o seu projeto. Este formulário
-          faz as perguntas certas para você — <b className="text-tinta font-semibold">sem termo técnico</b>,
+          faz as perguntas certas para você, <b className="text-tinta font-semibold">sem termo técnico</b>,
           e com explicação em cada item.
         </p>
         <div className="mt-6 rounded-2xl bg-ambar-fundo border border-ambar-linha p-4 text-[15px] text-tinta2 leading-relaxed">
           <b className="text-ambar font-bold">Não precisa entender de tecnologia.</b> Onde a pergunta for
-          técnica existe sempre a opção “não sei”. Marcar essa opção não atrapalha em nada — só
+          técnica existe sempre a opção “não sei”. Marcar essa opção não atrapalha em nada, só
           nos avisa que precisamos te explicar aquele ponto com calma.
         </div>
         <FormularioBriefing />

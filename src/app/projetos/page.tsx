@@ -22,7 +22,7 @@ export default async function Projetos() {
 
         {!projetos?.length ? (
           <p className="mt-12 cartao p-8 text-center text-suave">
-            Nenhum projeto publicado ainda — cadastre na tabela <code className="font-mono">portfolio</code>.
+            Nenhum projeto publicado ainda. Cadastre na tabela <code className="font-mono">portfolio</code>.
           </p>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2">

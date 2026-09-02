@@ -7,7 +7,7 @@ export const metadata = { title: "Briefing recebido" };
 const PASSOS: [string, string][] = [
   ["Análise do briefing", "Lemos tudo com calma e verificamos se dá para fazer do jeito que você imaginou, no prazo e no orçamento indicados."],
   ["Retorno", "Se fizer sentido para os dois lados, entramos em contato pelo WhatsApp ou e-mail que você deixou."],
-  ["Conversa de levantamento", "Detalhamos requisitos, especificações e escopo — é onde as ideias viram uma lista concreta do que será feito."],
+  ["Conversa de levantamento", "Detalhamos requisitos, especificações e escopo. É onde as ideias viram uma lista concreta do que será feito."],
   ["Proposta com os valores reais", "Só depois desse levantamento é que prazo e valor definitivos são fechados, por escrito. Qualquer número citado antes disso é estimativa."],
 ];
 
@@ -29,8 +29,7 @@ export default async function Enviado({
             Protocolo{" "}
             <span className="font-mono font-semibold text-tinta bg-cartao2 border border-linha rounded-md px-2 py-0.5">
               {codigo}
-            </span>{" "}
-            — guarde este número.
+            </span>. Guarde este número.
           </p>
         )}
         <p className="mt-4 text-[17px] text-tinta2 leading-relaxed">A partir daqui o caminho é este:</p>

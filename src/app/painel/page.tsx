@@ -87,7 +87,7 @@ export default async function Painel() {
                       <span className="font-semibold">{s.nome}</span>
                       {s.empresa && <span className="block text-[12.5px] text-suave">{s.empresa}</span>}
                     </td>
-                    <td className="px-4 py-3 text-tinta2">{String((s.respostas as Record<string, string>)?.tipo || "—")}</td>
+                    <td className="px-4 py-3 text-tinta2">{String((s.respostas as Record<string, string>)?.tipo || "-")}</td>
                     {podeVerValores && (
                       <td className="px-4 py-3 tabular-nums font-mono text-[12.5px]">
                         {est?.total ? (
@@ -95,7 +95,7 @@ export default async function Painel() {
                             {brl(est.total)}
                             <span className="block text-suave">{est.semanas} sem</span>
                           </>
-                        ) : "—"}
+                        ) : "-"}
                       </td>
                     )}
                     <td className="px-4 py-3">

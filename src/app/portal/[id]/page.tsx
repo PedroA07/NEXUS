@@ -67,7 +67,7 @@ export default async function ProjetoPortal({ params }: { params: Promise<{ id: 
                 ? [
                     ["Início", dataCurta(projeto.inicio)],
                     ["Entrega prevista", dataCurta(projeto.entrega_prevista)],
-                    ["Valor fechado", projeto.valor_fechado ? brl(Number(projeto.valor_fechado)) : "—"],
+                    ["Valor fechado", projeto.valor_fechado ? brl(Number(projeto.valor_fechado)) : "-"],
                   ]
                 : [
                     ["Início", dataCurta(projeto.inicio)],
@@ -112,7 +112,7 @@ export default async function ProjetoPortal({ params }: { params: Promise<{ id: 
         <section className="mt-10">
           <h2 className="text-xl font-bold">Conversa</h2>
           <p className="mt-1.5 text-[14px] text-suave">
-            Tudo que for combinado por aqui fica registrado — melhor que caçar mensagem no WhatsApp.
+            Tudo que for combinado por aqui fica registrado, melhor que caçar mensagem no WhatsApp.
           </p>
           <Chat projetoId={id} eu={perfil.id} souAdmin={admin} iniciais={mensagens ?? []} />
         </section>

@@ -17,7 +17,7 @@ type Respostas = Record<string, string | string[]>;
 
 function montarResumo(modo: "rapido" | "completo", d: Respostas) {
   const linhas: string[] = [
-    "BRIEFING DE PROJETO — NEXUS",
+    "BRIEFING DE PROJETO - NEXUS",
     modo === "rapido" ? "Formulário rápido" : "Formulário completo",
     "",
   ];
@@ -148,7 +148,7 @@ export async function abrirProjeto(
   const { data: sol, error: e1 } = await sb
     .from("solicitacoes").select("*").eq("id", solicitacaoId).single();
   if (e1 || !sol) return { ok: false, msg: "Solicitação não encontrada." };
-  if (!sol.email) return { ok: false, msg: "A solicitação não tem e-mail — peça um para dar acesso ao cliente." };
+  if (!sol.email) return { ok: false, msg: "A solicitação não tem e-mail. Peça um para dar acesso ao cliente." };
 
   let clienteId = sol.cliente_id as string | null;
 

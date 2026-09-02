@@ -1,4 +1,4 @@
-// Motor de estimativa da Nexus — mesmo cálculo do estimador interno.
+// Motor de estimativa da Nexus, mesmo cálculo do estimador interno.
 // Roda no servidor (quando uma solicitação chega) e no painel administrativo.
 
 export type Par = [string, number];

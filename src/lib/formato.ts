@@ -5,13 +5,13 @@ export const brl2 = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 
 export const dataCurta = (iso?: string | null) => {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso.length <= 10 ? iso + "T12:00:00" : iso);
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 };
 
 export const dataHora = (iso?: string | null) => {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleString("pt-BR", {
     day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
