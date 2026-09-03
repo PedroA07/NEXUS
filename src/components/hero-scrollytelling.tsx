@@ -54,6 +54,7 @@ const BLOCOS: Bloco[] = [
     titulo: "Android e iPhone a partir de uma base só.",
     corpo: "Publicados nas lojas e prontos para atualizar sempre que precisar.",
     imagem: "/hero/03-app.png",
+    video: "/hero/03-app.mp4",
     posicao: "centro",
   },
   {
