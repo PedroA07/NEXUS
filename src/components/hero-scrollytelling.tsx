@@ -85,83 +85,77 @@ const BLOCOS: Bloco[] = [
   },
 ];
 
-// Quanto de rolagem cada etapa consome, em vh. Durante PARADA_VH o painel fica
-// imóvel no centro e o scroll rasga o clipe dele quadro a quadro; durante
-// TRANSICAO_VH ninguém toca no vídeo e o que se move são os dois painéis
-// deslizando de lado. As duas coisas nunca acontecem ao mesmo tempo, então não
-// existe instante em que dois vídeos aparecem sobrepostos disputando atenção.
-const PARADA_VH = 100;
-const TRANSICAO_VH = 45;
-const PASSO_VH = PARADA_VH + TRANSICAO_VH;
+// Rolagem que cada capítulo consome. O clipe inteiro é rasgado nesse trecho.
+const CAPITULO_VH = 100;
 
 // Os clipes do hero são todos reencodados em 24 fps all-intra. Arredondar o
 // currentTime pra grade de quadros evita mandar o decodificador buscar de novo
 // por diferenças menores que um quadro, que ele nem chegaria a pintar.
 const FPS = 24;
 
-function alturaTotalVh(total: number) {
-  return total * PARADA_VH + (total - 1) * TRANSICAO_VH;
-}
+// Enquadramento de cada capítulo: o vídeo é ampliado e empurrado pro lado
+// oposto ao do texto, pra imagem e leitura ocuparem metades diferentes da
+// tela. O zoom existe justamente pra sobrar imagem nas bordas e o empurrão
+// não revelar o fundo.
+type Camera = { x: number; zoom: number };
+
+const ENQUADRAMENTO: Record<Posicao, Camera> = {
+  centro: { x: 0, zoom: 1.16 },
+  esquerda: { x: 11, zoom: 1.28 }, // texto à esquerda, imagem empurrada pra direita
+  direita: { x: -11, zoom: 1.28 }, // texto à direita, imagem empurrada pra esquerda
+};
+
+// De onde a câmera parte no primeiro quadro da página: mesmo eixo do capítulo
+// de abertura, só que mais fechada, pra abertura já nascer com um recuo lento.
+const CAMERA_INICIAL: Camera = { x: 0, zoom: 1.3 };
 
 function limite01(v: number) {
   return Math.min(1, Math.max(0, v));
 }
 
-// Acelera e desacelera a troca de painel. É função pura do progresso do scroll,
-// então continua reversível: subir desfaz o movimento pelo mesmo caminho.
-function suavizar(t: number) {
-  return t * t * (3 - 2 * t);
+// Chega perto do enquadramento final cedo (a leitura precisa do lado dela
+// livre já no começo do capítulo) mas nunca para de andar, porque o termo
+// linear mantém velocidade residual até o fim. Sem isso a câmera congelaria
+// na segunda metade de cada capítulo.
+function avanco(t: number) {
+  const desacelerado = 1 - Math.pow(1 - t, 3);
+  return 0.82 * desacelerado + 0.18 * t;
 }
 
-// Painel par sai pela esquerda, ímpar sai pela direita, e cada painel entra
-// pelo lado oposto ao que o anterior saiu. Na troca os dois viajam juntos no
-// mesmo sentido, e o sentido alterna a cada capítulo em vez de virar uma
-// esteira sempre pro mesmo lado.
-function direcaoSaida(indice: number) {
-  return indice % 2 === 0 ? -1 : 1;
+// Posição da câmera no progresso global. Cada capítulo interpola do
+// enquadramento do capítulo ANTERIOR para o seu, então no ponto de corte a
+// câmera está exatamente onde o capítulo que terminou a deixou: o clipe troca
+// sem que o enquadramento dê um salto.
+function camera(p: number, total: number): Camera {
+  const indice = Math.min(total - 1, Math.max(0, Math.floor(p * total)));
+  const t = limite01(p * total - indice);
+  const de = indice === 0 ? CAMERA_INICIAL : ENQUADRAMENTO[BLOCOS[indice - 1].posicao];
+  const para = ENQUADRAMENTO[BLOCOS[indice].posicao];
+  const e = avanco(t);
+  return {
+    x: de.x + (para.x - de.x) * e,
+    zoom: de.zoom + (para.zoom - de.zoom) * e,
+  };
 }
 
-function ladoEntrada(indice: number) {
-  return indice === 0 ? 0 : -direcaoSaida(indice - 1);
-}
-
-// Deslocamento horizontal do painel em % da largura da tela, para um progresso
-// global do scroll. 0 é centralizado, mais ou menos 100 é encostado fora da tela.
-function deslocamento(p: number, indice: number, total: number) {
-  const altura = alturaTotalVh(total);
-  const paradaInicio = (indice * PASSO_VH) / altura;
-  const paradaFim = (indice * PASSO_VH + PARADA_VH) / altura;
-
-  if (p < paradaInicio) {
-    if (indice === 0) return 0;
-    const comecouAEntrar = ((indice - 1) * PASSO_VH + PARADA_VH) / altura;
-    const t = suavizar(limite01((p - comecouAEntrar) / (paradaInicio - comecouAEntrar)));
-    return ladoEntrada(indice) * 100 * (1 - t);
-  }
-
-  if (p <= paradaFim) return 0;
-  if (indice === total - 1) return 0;
-
-  const terminouDeSair = ((indice + 1) * PASSO_VH) / altura;
-  const t = suavizar(limite01((p - paradaFim) / (terminouDeSair - paradaFim)));
-  return direcaoSaida(indice) * 100 * t;
-}
-
-// Quanto do clipe já passou. Só a parada conta: durante a transição o vídeo
-// fica no quadro em que estava, porque ali quem se mexe é o painel inteiro.
-function progressoClipe(p: number, indice: number, total: number) {
-  const altura = alturaTotalVh(total);
-  const inicio = (indice * PASSO_VH) / altura;
-  const fim = (indice * PASSO_VH + PARADA_VH) / altura;
-  return limite01((p - inicio) / (fim - inicio));
+// O texto some antes do corte e volta depois dele, então o clipe troca com a
+// tela limpa. O primeiro capítulo não tem entrada (a página abre com ele já
+// legível) e o último não tem saída (não há corte depois).
+function opacidadeTexto(t: number, primeiro: boolean, ultimo: boolean) {
+  const MARGEM = 0.14;
+  if (!primeiro && t < MARGEM) return t / MARGEM;
+  if (!ultimo && t > 1 - MARGEM) return (1 - t) / MARGEM;
+  return 1;
 }
 
 export function HeroScrollytelling() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const paineisRef = useRef<(HTMLDivElement | null)[]>([]);
+  const cameraRef = useRef<HTMLDivElement>(null);
   const videosRef = useRef<(HTMLVideoElement | null)[]>([]);
+  const textosRef = useRef<(HTMLDivElement | null)[]>([]);
   const duracoesRef = useRef<number[]>([]);
   const progressoRef = useRef(0);
+  const ativoRef = useRef(0);
   const reduzMovimento = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
@@ -190,29 +184,47 @@ export function HeroScrollytelling() {
       quadro = requestAnimationFrame(passo);
 
       const p = progressoRef.current;
-      const ativo = Math.min(total - 1, Math.floor((p * alturaTotalVh(total)) / PASSO_VH));
+      const indice = Math.min(total - 1, Math.max(0, Math.floor(p * total)));
+      const t = limite01(p * total - indice);
 
-      for (let i = 0; i < total; i++) {
-        const painel = paineisRef.current[i];
-        const video = videosRef.current[i];
-        const x = deslocamento(p, i, total);
+      const { x, zoom } = camera(p, total);
+      if (cameraRef.current) {
+        cameraRef.current.style.transform = `translate3d(${x.toFixed(3)}%, 0, 0) scale(${zoom.toFixed(4)})`;
+      }
 
-        if (painel) painel.style.transform = `translate3d(${x.toFixed(3)}%, 0, 0)`;
+      // Corte seco no capítulo: nada de dois clipes visíveis ao mesmo tempo.
+      // Só mexe quando o capítulo realmente vira.
+      if (ativoRef.current !== indice) {
+        videosRef.current.forEach((v, j) => {
+          if (v) v.style.opacity = j === indice ? "1" : "0";
+        });
+        ativoRef.current = indice;
+      }
 
-        // Só o painel atual e os vizinhos imediatos valem download completo:
-        // os outros ficam em metadata até chegar a vez deles.
-        if (video && Math.abs(i - ativo) <= 1 && video.preload !== "auto") {
+      for (let j = 0; j < total; j++) {
+        const texto = textosRef.current[j];
+        if (texto) {
+          texto.style.opacity =
+            j === indice ? String(opacidadeTexto(t, j === 0, j === total - 1)) : "0";
+        }
+
+        const video = videosRef.current[j];
+        if (!video) continue;
+
+        // Só o capítulo atual e o seguinte valem download completo; os outros
+        // ficam em metadata até chegar a vez deles.
+        if ((j === indice || j === indice + 1) && video.preload !== "auto") {
           video.preload = "auto";
         }
 
-        // Fora da tela não se manda seek. São sete clipes e no máximo dois
-        // aparecem ao mesmo tempo.
-        if (Math.abs(x) >= 100) continue;
+        // Fora do capítulo atual não se manda seek: são sete clipes e só um
+        // aparece por vez.
+        if (j !== indice) continue;
 
-        const duracao = duracoesRef.current[i];
-        if (!video || !duracao) continue;
+        const duracao = duracoesRef.current[j];
+        if (!duracao) continue;
 
-        const alvo = Math.round(progressoClipe(p, i, total) * duracao * FPS) / FPS;
+        const alvo = Math.round(t * duracao * FPS) / FPS;
         if (Math.abs(alvo - video.currentTime) >= 0.5 / FPS) video.currentTime = alvo;
       }
     });
@@ -241,44 +253,115 @@ export function HeroScrollytelling() {
     );
   }
 
+  const inicial = camera(0, BLOCOS.length);
+
   return (
     <section
       id="servicos"
       ref={containerRef}
       className="relative border-b border-linha bg-papel"
-      style={{ height: `${alturaTotalVh(BLOCOS.length)}vh` }}
+      style={{ height: `${BLOCOS.length * CAPITULO_VH}vh` }}
     >
       {/* Prende o hero na tela até o último capítulo terminar; depois a página
           volta a rolar normalmente. */}
       <div className="sticky top-0 h-screen overflow-hidden">
+        {/* Uma câmera só para todos os clipes: é ela que dá o movimento
+            lateral e o zoom, e é por ela ser única que o enquadramento
+            atravessa o corte sem salto. */}
+        <div
+          ref={cameraRef}
+          className="absolute inset-0"
+          style={{
+            transform: `translate3d(${inicial.x}%, 0, 0) scale(${inicial.zoom})`,
+            willChange: "transform",
+          }}
+        >
+          {BLOCOS.map((bloco, indice) =>
+            bloco.video ? (
+              <video
+                key={bloco.titulo}
+                ref={(el) => {
+                  videosRef.current[indice] = el;
+                }}
+                src={bloco.video}
+                poster={bloco.poster}
+                muted
+                playsInline
+                preload={indice <= 1 ? "auto" : "metadata"}
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate noremoteplayback"
+                onLoadedMetadata={(e) => {
+                  duracoesRef.current[indice] = e.currentTarget.duration;
+                  // Decodifica um quadro real de imediato, pro corte para este
+                  // capítulo não cair num elemento ainda vazio.
+                  e.currentTarget.currentTime = 0;
+                }}
+                style={{ opacity: indice === 0 ? 1 : 0 }}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                key={bloco.titulo}
+                src={bloco.imagem}
+                alt=""
+                fill
+                priority={indice === 0}
+                sizes="100vw"
+                style={{ opacity: indice === 0 ? 1 : 0 }}
+                className="object-cover"
+              />
+            ),
+          )}
+        </div>
+
+        {/* Texto e véu de legibilidade ficam fora da câmera: quem se move é a
+            imagem, a leitura fica firme no lugar dela. */}
         {BLOCOS.map((bloco, indice) => (
-          <Painel
+          <div
             key={bloco.titulo}
-            bloco={bloco}
-            indice={indice}
-            refPainel={(el) => {
-              paineisRef.current[indice] = el;
+            ref={(el) => {
+              textosRef.current[indice] = el;
             }}
-            refVideo={(el) => {
-              videosRef.current[indice] = el;
-            }}
-            aoMedirDuracao={(d) => {
-              duracoesRef.current[indice] = d;
-            }}
-          />
+            className="absolute inset-0"
+            style={{ opacity: indice === 0 ? 1 : 0 }}
+          >
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: GRADIENTE_TEXTO[bloco.posicao] }}
+            />
+            <div className="absolute inset-0 flex items-center">
+              <div className={`max-w-6xl mx-auto px-5 w-full flex ${ALINHO_TEXTO[bloco.posicao]}`}>
+                <div className="max-w-2xl">
+                  <p className="olho">{bloco.olho}</p>
+                  <h2
+                    className={
+                      bloco.cta
+                        ? "mt-4 text-[clamp(2.1rem,5.4vw,3.6rem)] font-bold leading-[1.1] text-balance"
+                        : "mt-4 text-[clamp(1.7rem,4vw,2.6rem)] font-bold leading-[1.15] text-balance"
+                    }
+                  >
+                    {bloco.titulo}
+                  </h2>
+                  <p className="mt-5 text-lg text-tinta2 leading-relaxed max-w-xl">{bloco.corpo}</p>
+                  {bloco.cta && (
+                    <div
+                      className={`mt-8 flex flex-wrap gap-3 ${
+                        bloco.posicao === "centro" ? "justify-center" : "justify-start"
+                      }`}
+                    >
+                      <Link href="/solicitar" className="btn-p">Solicitar orçamento</Link>
+                      <Link href="/projetos" className="btn-s">Ver projetos</Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </section>
   );
 }
-
-// Com o texto do lado esquerdo, o assunto do vídeo desloca para a direita (e
-// vice-versa), pra não ficar escondido atrás da leitura.
-const FOCO_FUNDO: Record<Posicao, string> = {
-  centro: "50% center",
-  esquerda: "80% center",
-  direita: "20% center",
-};
 
 // Escurece só a área por trás do texto, em vez da tela inteira.
 const GRADIENTE_TEXTO: Record<Posicao, string> = {
@@ -292,93 +375,6 @@ const ALINHO_TEXTO: Record<Posicao, string> = {
   esquerda: "justify-start text-left",
   direita: "justify-end text-left",
 };
-
-function Painel({
-  bloco,
-  indice,
-  refPainel,
-  refVideo,
-  aoMedirDuracao,
-}: {
-  bloco: Bloco;
-  indice: number;
-  refPainel: (el: HTMLDivElement | null) => void;
-  refVideo: (el: HTMLVideoElement | null) => void;
-  aoMedirDuracao: (duracao: number) => void;
-}) {
-  const centralizado = bloco.posicao === "centro";
-  // Posição de partida já correta no HTML do servidor: o primeiro painel
-  // centralizado, os demais estacionados fora da tela do lado por onde entram.
-  const xInicial = indice === 0 ? 0 : ladoEntrada(indice) * 100;
-
-  return (
-    <div
-      ref={refPainel}
-      className="absolute inset-0"
-      style={{ transform: `translate3d(${xInicial}%, 0, 0)`, willChange: "transform" }}
-    >
-      {bloco.video ? (
-        <video
-          ref={refVideo}
-          src={bloco.video}
-          poster={bloco.poster}
-          muted
-          playsInline
-          preload={indice <= 1 ? "auto" : "metadata"}
-          disablePictureInPicture
-          controlsList="nodownload noplaybackrate noremoteplayback"
-          onLoadedMetadata={(e) => {
-            aoMedirDuracao(e.currentTarget.duration);
-            // Decodifica um quadro real de imediato, em vez de deixar só o
-            // pôster à mostra até o primeiro ajuste de scroll chegar.
-            e.currentTarget.currentTime = 0;
-          }}
-          style={{ objectPosition: FOCO_FUNDO[bloco.posicao] }}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      ) : (
-        <Image
-          src={bloco.imagem}
-          alt=""
-          fill
-          priority={indice === 0}
-          sizes="100vw"
-          style={{ objectPosition: FOCO_FUNDO[bloco.posicao] }}
-          className="object-cover"
-        />
-      )}
-
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: GRADIENTE_TEXTO[bloco.posicao] }}
-      />
-
-      <div className="absolute inset-0 flex items-center">
-        <div className={`max-w-6xl mx-auto px-5 w-full flex ${ALINHO_TEXTO[bloco.posicao]}`}>
-          <div className="max-w-2xl">
-            <p className="olho">{bloco.olho}</p>
-            <h2
-              className={
-                bloco.cta
-                  ? "mt-4 text-[clamp(2.1rem,5.4vw,3.6rem)] font-bold leading-[1.1] text-balance"
-                  : "mt-4 text-[clamp(1.7rem,4vw,2.6rem)] font-bold leading-[1.15] text-balance"
-              }
-            >
-              {bloco.titulo}
-            </h2>
-            <p className="mt-5 text-lg text-tinta2 leading-relaxed max-w-xl">{bloco.corpo}</p>
-            {bloco.cta && (
-              <div className={`mt-8 flex flex-wrap gap-3 ${centralizado ? "justify-center" : "justify-start"}`}>
-                <Link href="/solicitar" className="btn-p">Solicitar orçamento</Link>
-                <Link href="/projetos" className="btn-s">Ver projetos</Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function BlocoEstatico({ bloco }: { bloco: Bloco }) {
   return (
