@@ -70,6 +70,7 @@ const BLOCOS: Bloco[] = [
     titulo: "Os números do negócio em um painel só.",
     corpo: "Atualizados sem ninguém precisar montar planilha.",
     imagem: "/hero/05-dados.png",
+    video: "/hero/05-dados.mp4",
     posicao: "direita",
   },
   {
@@ -77,6 +78,7 @@ const BLOCOS: Bloco[] = [
     titulo: "Atendimento automático, classificação e análise.",
     corpo: "Integrados ao que você já usa, sem trocar de sistema.",
     imagem: "/hero/06-ia.png",
+    video: "/hero/06-ia.mp4",
     posicao: "centro",
   },
 ];
@@ -114,18 +116,41 @@ function useBlocoOpacidade(indice: number, total: number, progresso: MotionValue
   return useTransform(progresso, entradas, saidas);
 }
 
-// Janela em que o vídeo do bloco realmente avança: só durante o platô em
-// que ele já está 100% opaco, não durante o dissolve. O clipe termina de
-// tocar ANTES do crossfade começar e só recomeça DEPOIS dele terminar,
-// senão duas animações diferentes se misturam durante a transição.
-function useJanelaVideo(indice: number, total: number) {
+// Janela em que a mídia do bloco se mexe: toda a vida VISÍVEL da camada,
+// dissolve incluído, e não só o platô opaco. Bate exatamente com a janela
+// de opacidade, então enquanto a camada aparece na tela o vídeo está
+// sempre avançando e o enquadramento sempre derivando. Se a mídia parasse
+// durante o crossfade (era o que acontecia antes), o olho veria dois
+// quadros congelados um substituindo o outro, que lê como troca de slide.
+function useJanelaMidia(indice: number, total: number) {
   const { inicio, fim, largura } = useJanela(indice, total);
   const meio = (largura * TRANSICAO_FRACAO) / 2;
   const primeiro = indice === 0;
   const ultimo = indice === total - 1;
-  const videoInicio = primeiro ? inicio : inicio + meio;
-  const videoFim = ultimo ? fim : fim - meio;
-  return { videoInicio, videoFim };
+  return {
+    entrada: primeiro ? inicio : inicio - meio,
+    saida: ultimo ? fim : fim + meio,
+  };
+}
+
+// Deriva lateral e zoom-out lentos aplicados ao longo da janela da camada.
+// Todas as camadas derivam no MESMO sentido e na mesma velocidade, então no
+// instante do cruzamento as duas estão andando juntas e a transição lê como
+// um movimento só continuando, não como um corte.
+const DERIVA_X = 2.4; // % da largura, de +DERIVA_X (entrada) a -DERIVA_X (saída)
+const ZOOM_ENTRADA = 1.16;
+const ZOOM_SAIDA = 1.08;
+
+// A escala sobra folga suficiente nas bordas (8% de cada lado no mínimo)
+// pra deriva de 2.4% nunca revelar o fundo atrás do vídeo.
+function transformarMidia(local: number) {
+  const x = (0.5 - local) * 2 * DERIVA_X;
+  const escala = ZOOM_ENTRADA + (ZOOM_SAIDA - ZOOM_ENTRADA) * local;
+  return `translate3d(${x.toFixed(3)}%, 0, 0) scale(${escala.toFixed(4)})`;
+}
+
+function progressoLocal(v: number, entrada: number, saida: number) {
+  return Math.min(1, Math.max(0, (v - entrada) / (saida - entrada)));
 }
 
 // Motion (13.x) não está aplicando `style={{ opacity: motionValue }}` ao DOM
@@ -242,57 +267,95 @@ function CamadaFundo({
   progresso: MotionValue<number>;
 }) {
   const { ref, valorInicial } = useOpacidadeImperativa(indice, total, progresso);
-  const { videoInicio, videoFim } = useJanelaVideo(indice, total);
+  const { entrada, saida } = useJanelaMidia(indice, total);
+  const midiaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [duracao, setDuracao] = useState(0);
+  const duracaoRef = useRef(0);
+  const alvoRef = useRef(progresso.get());
+  const tempoRef = useRef<number | null>(null);
+
+  // O evento de scroll só guarda o alvo; quem escreve no DOM é o rAF abaixo.
+  // Scroll chega em rajadas irregulares, e mandar cada uma direto pro
+  // currentTime faz o vídeo engasgar; um write por quadro sai liso.
+  useMotionValueEvent(progresso, "change", (v) => {
+    alvoRef.current = v;
+  });
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
     // "Destrava" o decodificador de vídeo no iOS Safari, senão o primeiro
     // ajuste de currentTime pelo scroll não funciona.
-    video.play().then(() => video.pause()).catch(() => {});
-  }, []);
+    if (video) video.play().then(() => video.pause()).catch(() => {});
 
-  useMotionValueEvent(progresso, "change", (v) => {
-    const video = videoRef.current;
-    if (!video || !duracao) return;
-    const local = Math.min(1, Math.max(0, (v - videoInicio) / (videoFim - videoInicio)));
-    video.currentTime = local * duracao;
-  });
+    let quadro = requestAnimationFrame(function passo() {
+      quadro = requestAnimationFrame(passo);
+
+      const v = alvoRef.current;
+      // Fora da própria janela a camada está invisível: nada de derivar
+      // enquadramento nem, principalmente, mandar seek pro decodificador
+      // (são sete camadas, só duas aparecem por vez).
+      if (v <= entrada - 0.002 || v >= saida + 0.002) return;
+
+      const local = progressoLocal(v, entrada, saida);
+
+      const midia = midiaRef.current;
+      if (midia) midia.style.transform = transformarMidia(local);
+
+      const duracao = duracaoRef.current;
+      if (!video || !duracao) return;
+
+      const alvo = local * duracao;
+      const atual = tempoRef.current ?? alvo;
+      // Persegue o alvo em vez de saltar até ele: suaviza a granularidade do
+      // scroll. Salto direto quando a distância é grande (rolagem rápida,
+      // âncora, restauração de posição), senão ficaria correndo atrás.
+      const proximo = Math.abs(alvo - atual) > 0.4 ? alvo : atual + (alvo - atual) * 0.25;
+      tempoRef.current = proximo;
+      if (Math.abs(proximo - video.currentTime) > 0.01) video.currentTime = proximo;
+    });
+
+    return () => cancelAnimationFrame(quadro);
+  }, [entrada, saida]);
 
   const objectPosition = FOCO_FUNDO[bloco.posicao];
+  const transformInicial = transformarMidia(progressoLocal(progresso.get(), entrada, saida));
 
   return (
     <div ref={ref} style={{ opacity: valorInicial }} className="absolute inset-0">
-      {bloco.video ? (
-        <video
-          ref={videoRef}
-          src={bloco.video}
-          poster={bloco.imagem}
-          muted
-          playsInline
-          preload="auto"
-          onLoadedMetadata={(e) => {
-            setDuracao(e.currentTarget.duration);
-            // Decodifica um frame real de imediato, em vez de deixar só o
-            // poster à mostra até o primeiro ajuste de scroll chegar.
-            e.currentTarget.currentTime = 0;
-          }}
-          style={{ objectPosition }}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      ) : (
-        <Image
-          src={bloco.imagem}
-          alt=""
-          fill
-          priority={indice === 0}
-          sizes="100vw"
-          style={{ objectPosition }}
-          className="object-cover"
-        />
-      )}
+      <div
+        ref={midiaRef}
+        style={{ transform: transformInicial, willChange: "transform" }}
+        className="absolute inset-0"
+      >
+        {bloco.video ? (
+          <video
+            ref={videoRef}
+            src={bloco.video}
+            poster={bloco.imagem}
+            muted
+            playsInline
+            preload="auto"
+            onLoadedMetadata={(e) => {
+              duracaoRef.current = e.currentTarget.duration;
+              // Decodifica um frame real de imediato, em vez de deixar só o
+              // poster à mostra até o primeiro ajuste de scroll chegar.
+              e.currentTarget.currentTime = 0;
+            }}
+            style={{ objectPosition }}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <Image
+            src={bloco.imagem}
+            alt=""
+            fill
+            priority={indice === 0}
+            sizes="100vw"
+            style={{ objectPosition }}
+            className="object-cover"
+          />
+        )}
+      </div>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: GRADIENTE_TEXTO[bloco.posicao] }}
