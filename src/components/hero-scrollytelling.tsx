@@ -153,9 +153,7 @@ export function HeroScrollytelling() {
   const cameraRef = useRef<HTMLDivElement>(null);
   const videosRef = useRef<(HTMLVideoElement | null)[]>([]);
   const textosRef = useRef<(HTMLDivElement | null)[]>([]);
-  const duracoesRef = useRef<number[]>([]);
   const progressoRef = useRef(0);
-  const ativoRef = useRef(0);
   const reduzMovimento = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
@@ -192,15 +190,6 @@ export function HeroScrollytelling() {
         cameraRef.current.style.transform = `translate3d(${x.toFixed(3)}%, 0, 0) scale(${zoom.toFixed(4)})`;
       }
 
-      // Corte seco no capítulo: nada de dois clipes visíveis ao mesmo tempo.
-      // Só mexe quando o capítulo realmente vira.
-      if (ativoRef.current !== indice) {
-        videosRef.current.forEach((v, j) => {
-          if (v) v.style.opacity = j === indice ? "1" : "0";
-        });
-        ativoRef.current = indice;
-      }
-
       for (let j = 0; j < total; j++) {
         const texto = textosRef.current[j];
         if (texto) {
@@ -211,18 +200,22 @@ export function HeroScrollytelling() {
         const video = videosRef.current[j];
         if (!video) continue;
 
-        // Só o capítulo atual e o seguinte valem download completo; os outros
-        // ficam em metadata até chegar a vez deles.
-        if ((j === indice || j === indice + 1) && video.preload !== "auto") {
-          video.preload = "auto";
-        }
+        // Corte seco: um clipe visível por vez. Reescrito a TODO quadro, e não
+        // só na virada de capítulo. As refs são callbacks inline, que o React
+        // desanexa e reanexa a cada re-render; um quadro que caia nessa janela
+        // encontra a ref nula e perde a escrita. Preso à virada, o clipe errado
+        // ficava na tela até o capítulo seguinte (o "vídeo de atraso"). Escrito
+        // a cada quadro, o quadro seguinte conserta sozinho.
+        video.style.opacity = j === indice ? "1" : "0";
 
         // Fora do capítulo atual não se manda seek: são sete clipes e só um
         // aparece por vez.
         if (j !== indice) continue;
 
-        const duracao = duracoesRef.current[j];
-        if (!duracao) continue;
+        // Lido do próprio elemento em vez de um cache paralelo: um cache que
+        // não tenha sido preenchido faria o clipe congelar sem sinal nenhum.
+        const duracao = video.duration;
+        if (!Number.isFinite(duracao) || duracao <= 0) continue;
 
         const alvo = Math.round(t * duracao * FPS) / FPS;
         if (Math.abs(alvo - video.currentTime) >= 0.5 / FPS) video.currentTime = alvo;
@@ -287,15 +280,12 @@ export function HeroScrollytelling() {
                 poster={bloco.poster}
                 muted
                 playsInline
-                preload={indice <= 1 ? "auto" : "metadata"}
+                // Todos em "auto". Com "metadata" cada busca do scroll vira ida
+                // à rede e o clipe fica preso no primeiro quadro, que é o que
+                // fazia os capítulos do meio parecerem imagem estática.
+                preload="auto"
                 disablePictureInPicture
                 controlsList="nodownload noplaybackrate noremoteplayback"
-                onLoadedMetadata={(e) => {
-                  duracoesRef.current[indice] = e.currentTarget.duration;
-                  // Decodifica um quadro real de imediato, pro corte para este
-                  // capítulo não cair num elemento ainda vazio.
-                  e.currentTarget.currentTime = 0;
-                }}
                 style={{ opacity: indice === 0 ? 1 : 0 }}
                 className="absolute inset-0 w-full h-full object-cover"
               />
