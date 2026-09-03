@@ -314,6 +314,12 @@ export function HeroScrollytelling() {
           )}
         </div>
 
+        {/* Fora da câmera, então não sofre o zoom nem o empurrão lateral. */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: VEU_BASE }}
+        />
+
         {/* Texto e véu de legibilidade ficam fora da câmera: quem se move é a
             imagem, a leitura fica firme no lugar dela. */}
         {BLOCOS.map((bloco, indice) => (
@@ -330,8 +336,12 @@ export function HeroScrollytelling() {
               style={{ background: GRADIENTE_TEXTO[bloco.posicao] }}
             />
             <div className="absolute inset-0 flex items-center">
-              <div className={`max-w-6xl mx-auto px-5 w-full flex ${ALINHO_TEXTO[bloco.posicao]}`}>
-                <div className="max-w-2xl">
+              {/* Largura total com recuo nas bordas, em vez de uma caixa
+                  centralizada: numa tela larga a caixa central jogava o texto
+                  "da esquerda" por cima do meio da tela, e o alinhamento
+                  lateral não se lia. */}
+              <div className={`w-full px-[clamp(1.25rem,7vw,7rem)] flex ${ALINHO_TEXTO[bloco.posicao]}`}>
+                <div className={bloco.cta ? "max-w-2xl" : "max-w-xl"}>
                   <p className="olho">{bloco.olho}</p>
                   <h2
                     className={
@@ -363,11 +373,21 @@ export function HeroScrollytelling() {
   );
 }
 
-// Escurece só a área por trás do texto, em vez da tela inteira.
+// Véu constante sobre todos os capítulos. Como não muda de um capítulo pro
+// outro, atravessa o corte sem piscar, e é ele que garante um piso de contraste
+// mesmo quando cai um quadro claro do vídeo por baixo do texto.
+const VEU_BASE =
+  "linear-gradient(to bottom, rgba(11,13,19,0.46) 0%, rgba(11,13,19,0.14) 34%, rgba(11,13,19,0.2) 60%, rgba(11,13,19,0.55) 100%)";
+
+// Por cima do véu, escurece o lado onde o texto do capítulo está. Acompanha o
+// texto (aparece e some junto com ele), então some antes do corte.
 const GRADIENTE_TEXTO: Record<Posicao, string> = {
-  centro: "radial-gradient(ellipse 62% 48% at 50% 58%, rgba(11,13,19,0.72), transparent 72%)",
-  esquerda: "linear-gradient(100deg, rgba(11,13,19,0.72) 0%, rgba(11,13,19,0.45) 32%, transparent 62%)",
-  direita: "linear-gradient(260deg, rgba(11,13,19,0.72) 0%, rgba(11,13,19,0.45) 32%, transparent 62%)",
+  centro:
+    "radial-gradient(ellipse 76% 60% at 50% 56%, rgba(11,13,19,0.84) 0%, rgba(11,13,19,0.5) 52%, transparent 78%)",
+  esquerda:
+    "linear-gradient(100deg, rgba(11,13,19,0.88) 0%, rgba(11,13,19,0.74) 24%, rgba(11,13,19,0.38) 50%, transparent 72%)",
+  direita:
+    "linear-gradient(260deg, rgba(11,13,19,0.88) 0%, rgba(11,13,19,0.74) 24%, rgba(11,13,19,0.38) 50%, transparent 72%)",
 };
 
 const ALINHO_TEXTO: Record<Posicao, string> = {
