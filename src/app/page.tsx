@@ -2,8 +2,10 @@ import Link from "next/link";
 import { Cabecalho } from "@/components/cabecalho";
 import { Rodape } from "@/components/rodape";
 import { HeroScrollytelling } from "@/components/hero-scrollytelling";
-import { Revelar, LinhaAvanco } from "@/components/revelar";
+import { Revelar } from "@/components/revelar";
 import { CasoDestaque } from "@/components/caso-destaque";
+import { ServicosHorizontal } from "@/components/servicos-horizontal";
+import { ProcessoHorizontal } from "@/components/processo-horizontal";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 
 const DESTAQUE = {
@@ -42,6 +44,15 @@ const SERVICOS = [
     corpo:
       "Atendimento automático, classificação e análise integrados ao que você já usa, sem trocar de sistema.",
   },
+];
+
+const SERVICOS_COM_IMAGENS = [
+  { ...DESTAQUE, imagem: "/hero/01-site-poster.jpg" },
+  { ...SERVICOS[0], imagem: "/hero/02-sistema-poster.jpg" },
+  { ...SERVICOS[1], imagem: "/hero/03-app-poster.jpg" },
+  { ...SERVICOS[2], imagem: "/hero/04-automacao-poster.jpg" },
+  { ...SERVICOS[3], imagem: "/hero/05-dados-poster.jpg" },
+  { ...SERVICOS[4], imagem: "/hero/06-ia-poster.jpg" },
 ];
 
 const PASSOS = [
@@ -103,70 +114,8 @@ export default async function Home() {
         </section>
 
         {/* serviços */}
-        <section
-          id="servicos"
-          className="relative bg-papel border-t border-linha pt-[clamp(4.5rem,12vh,8.75rem)] pb-[clamp(6rem,16vh,11.25rem)]"
-        >
-          <div className="secao grid lg:grid-cols-[200px_1fr] gap-[clamp(2rem,5vw,4.5rem)] items-start">
-            <div className="hidden lg:block sticky top-[120px]">
-              <span className="olho-suave">01 — Serviços</span>
-              <p className="mt-4 text-[14px] text-suave leading-[1.6] max-w-[22ch]">
-                Do que a Nexus constrói, e para que serve cada um.
-              </p>
-            </div>
-
-            <div>
-              <Revelar>
-                <Link
-                  href="/solicitar"
-                  className="block relative border border-linha p-[clamp(1.75rem,4vw,3.5rem)] overflow-hidden transition-[border-color,background-color] duration-[400ms] hover:border-ember hover:bg-[#12141c]"
-                >
-                  <span
-                    aria-hidden
-                    className="absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[clamp(6rem,14vw,13rem)] font-semibold leading-none text-cartao pointer-events-none select-none"
-                  >
-                    {DESTAQUE.numero}
-                  </span>
-                  <div className="relative max-w-[30ch]">
-                    <span className="olho">Serviço em destaque</span>
-                    <h3 className="mt-5 text-[clamp(1.8rem,3.6vw,3.2rem)] font-bold leading-[1.03] tracking-[-0.03em]">
-                      {DESTAQUE.titulo}
-                    </h3>
-                    <p className="mt-5 text-[clamp(1rem,1.2vw,1.15rem)] text-leitura leading-[1.6] max-w-[44ch]">
-                      {DESTAQUE.corpo}
-                    </p>
-                    <span className="mt-8 inline-flex items-center gap-3 font-mono text-[12px] tracking-[0.14em] uppercase text-tinta border-b border-linha2 pb-1.5">
-                      Começar pelo briefing →
-                    </span>
-                  </div>
-                </Link>
-              </Revelar>
-
-              <div className="mt-0.5">
-                {SERVICOS.map((servico, i) => (
-                  <Revelar key={servico.numero} atraso={i * 40}>
-                    <Link
-                      href="/solicitar"
-                      className={`grid lg:grid-cols-[64px_1fr_1.1fr_auto] gap-[clamp(1rem,3vw,2.5rem)] lg:items-baseline border-t border-linha py-[clamp(1.5rem,3vw,2.125rem)] transition-colors duration-[350ms] hover:bg-[#12141c] ${
-                        i === SERVICOS.length - 1 ? "border-b" : ""
-                      }`}
-                    >
-                      <span className="font-mono text-[12px] tracking-[0.1em] text-suave">
-                        {servico.numero}
-                      </span>
-                      <h3 className="text-[clamp(1.25rem,2vw,1.75rem)] font-semibold leading-[1.1] tracking-[-0.02em]">
-                        {servico.titulo}
-                      </h3>
-                      <p className="text-[15.5px] text-tinta2 leading-[1.6]">{servico.corpo}</p>
-                      <span aria-hidden className="hidden lg:block font-mono text-[14px] text-linha2">
-                        →
-                      </span>
-                    </Link>
-                  </Revelar>
-                ))}
-              </div>
-            </div>
-          </div>
+        <section id="servicos" className="relative bg-papel border-t border-linha pt-[clamp(4.5rem,12vh,8.75rem)] pb-[clamp(6rem,16vh,11.25rem)]">
+          <ServicosHorizontal servicos={SERVICOS_COM_IMAGENS} />
         </section>
 
         {/* estúdio */}
@@ -244,28 +193,9 @@ export default async function Home() {
               </Revelar>
             </div>
 
-            <LinhaAvanco className="mt-[clamp(3.5rem,9vh,6.875rem)]">
-              <ol className="grid gap-[clamp(1.25rem,3vw,3rem)] sm:grid-cols-2 lg:grid-cols-4">
-                {PASSOS.map((passo, i) => (
-                  <li key={passo.numero} className="relative pt-[clamp(1.75rem,4vh,2.75rem)]">
-                    <span
-                      aria-hidden
-                      className="absolute left-0 top-0 w-px h-[clamp(1.25rem,3vh,2rem)] bg-linha2"
-                    />
-                    <Revelar atraso={i * 70}>
-                      <div className="font-mono text-[clamp(2.6rem,5vw,4.4rem)] font-medium leading-none tracking-[-0.04em] text-linha">
-                        {passo.numero}
-                      </div>
-                      <span className="mt-5 block olho">{passo.etapa}</span>
-                      <h3 className="mt-3 text-[clamp(1.1rem,1.5vw,1.35rem)] font-semibold leading-[1.2] tracking-[-0.02em]">
-                        {passo.titulo}
-                      </h3>
-                      <p className="mt-3 text-[15px] text-tinta2 leading-[1.65]">{passo.corpo}</p>
-                    </Revelar>
-                  </li>
-                ))}
-              </ol>
-            </LinhaAvanco>
+            <div className="mt-[clamp(3.5rem,9vh,6.875rem)] -mx-[clamp(1.5rem,5vw,6rem)]">
+              <ProcessoHorizontal passos={PASSOS} />
+            </div>
           </div>
         </section>
 
