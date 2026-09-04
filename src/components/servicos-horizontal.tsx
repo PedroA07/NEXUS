@@ -13,6 +13,7 @@ type Servico = {
 
 export function ServicosHorizontal({ servicos }: { servicos: Servico[] }) {
   const pistaRef = useRef<HTMLDivElement>(null);
+  const arrasteRef = useRef({ ativo: false, inicio: 0, scroll: 0, moveu: false });
   const [indice, setIndice] = useState(0);
   const [progresso, setProgresso] = useState(0);
 
@@ -44,6 +45,35 @@ export function ServicosHorizontal({ servicos }: { servicos: Servico[] }) {
     pista.scrollBy({ left: direcao * (card.offsetWidth + 2), behavior: "smooth" });
   };
 
+  const iniciarArraste = (ev: React.PointerEvent<HTMLDivElement>) => {
+    const pista = pistaRef.current;
+    if (!pista) return;
+    arrasteRef.current = { ativo: true, inicio: ev.clientX, scroll: pista.scrollLeft, moveu: false };
+    pista.setPointerCapture(ev.pointerId);
+  };
+
+  const arrastar = (ev: React.PointerEvent<HTMLDivElement>) => {
+    const pista = pistaRef.current;
+    const estado = arrasteRef.current;
+    if (!pista || !estado.ativo) return;
+    const distancia = ev.clientX - estado.inicio;
+    if (Math.abs(distancia) > 4) estado.moveu = true;
+    pista.scrollLeft = estado.scroll - distancia;
+  };
+
+  const terminarArraste = (ev: React.PointerEvent<HTMLDivElement>) => {
+    const pista = pistaRef.current;
+    if (pista?.hasPointerCapture(ev.pointerId)) pista.releasePointerCapture(ev.pointerId);
+    arrasteRef.current.ativo = false;
+  };
+
+  const impedirCliqueDepoisDoArraste = (ev: React.MouseEvent<HTMLAnchorElement>) => {
+    if (arrasteRef.current.moveu) {
+      ev.preventDefault();
+      arrasteRef.current.moveu = false;
+    }
+  };
+
   return (
     <>
       <div className="secao flex items-end justify-between gap-8 flex-wrap">
@@ -67,9 +97,10 @@ export function ServicosHorizontal({ servicos }: { servicos: Servico[] }) {
       </div>
 
       <div ref={pistaRef} role="group" aria-label="Serviços da Nexus Hub" tabIndex={0}
-        className="mt-[clamp(2.5rem,6vh,4.5rem)] flex gap-0.5 overflow-x-auto scroll-smooth snap-x snap-mandatory px-[clamp(1.5rem,5vw,6rem)] pb-1 scrollbar-none focus-visible:outline-ember">
+        onPointerDown={iniciarArraste} onPointerMove={arrastar} onPointerUp={terminarArraste} onPointerCancel={terminarArraste}
+        className="mt-[clamp(2.5rem,6vh,4.5rem)] flex cursor-grab touch-pan-y select-none gap-0.5 overflow-x-auto scroll-smooth snap-x snap-mandatory px-[clamp(1.5rem,5vw,6rem)] pb-1 scrollbar-none focus-visible:outline-ember active:cursor-grabbing">
         {servicos.map((servico) => (
-          <Link key={servico.numero} href="/solicitar" data-servico
+          <Link key={servico.numero} href="/solicitar" data-servico onClick={impedirCliqueDepoisDoArraste}
             className="group relative block w-[min(88vw,520px)] shrink-0 snap-start border border-linha bg-painel transition-colors duration-300 hover:border-ember hover:bg-[#12141c]">
             <div className="relative aspect-[16/11] overflow-hidden bg-papel">
               <Image src={servico.imagem} alt={servico.titulo} fill sizes="(max-width: 640px) 88vw, 520px"

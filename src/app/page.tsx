@@ -47,12 +47,12 @@ const SERVICOS = [
 ];
 
 const SERVICOS_COM_IMAGENS = [
-  { ...DESTAQUE, imagem: "/hero/01-site-poster.jpg" },
-  { ...SERVICOS[0], imagem: "/hero/02-sistema-poster.jpg" },
-  { ...SERVICOS[1], imagem: "/hero/03-app-poster.jpg" },
-  { ...SERVICOS[2], imagem: "/hero/04-automacao-poster.jpg" },
-  { ...SERVICOS[3], imagem: "/hero/05-dados-poster.jpg" },
-  { ...SERVICOS[4], imagem: "/hero/06-ia-poster.jpg" },
+  { ...DESTAQUE, imagem: "/hero/01-site.png" },
+  { ...SERVICOS[0], imagem: "/hero/02-sistema.png" },
+  { ...SERVICOS[1], imagem: "/hero/03-app.png" },
+  { ...SERVICOS[2], imagem: "/hero/04-automacao.png" },
+  { ...SERVICOS[3], imagem: "/hero/05-dados.png" },
+  { ...SERVICOS[4], imagem: "/hero/06-ia.png" },
 ];
 
 const PASSOS = [
@@ -134,25 +134,29 @@ export default async function Home() {
                 </p>
               </blockquote>
             </Revelar>
-            <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid gap-[clamp(1.5rem,4vw,4rem)] sm:grid-cols-2 max-w-[1000px]">
-              <Revelar>
-                <p className="text-[16.5px] text-tinta2 leading-[1.7]">
-                  Nada de molde pronto. A Nexus nasceu de um jeito simples de pensar software:
-                  entender o problema antes de escolher a ferramenta, e escrever só o que resolve.
-                </p>
-              </Revelar>
-              <Revelar atraso={70}>
-                <p className="text-[16.5px] text-tinta2 leading-[1.7]">
-                  A equipe cresce projeto a projeto, conforme o que cada trabalho pede, sem inflar
-                  quadro nem terceirizar sem avisar. O{" "}
-                  <Link
-                    href="/projetos"
-                    className="text-tinta border-b border-linha2 transition-colors hover:border-ember"
-                  >
-                    portfólio
-                  </Link>{" "}
-                  mostra a amplitude: de aplicativos autorais a sistemas internos de gestão.
-                </p>
+            <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid gap-[clamp(2rem,6vw,6rem)] lg:grid-cols-[1.15fr_1fr] items-start">
+              <div className="grid gap-8 sm:grid-cols-2 max-w-[1000px]">
+                <Revelar>
+                  <p className="text-[16.5px] text-tinta2 leading-[1.7]">
+                    Nada de molde pronto. A Nexus nasceu de um jeito simples de pensar software:
+                    entender o problema antes de escolher a ferramenta, e escrever só o que resolve.
+                  </p>
+                </Revelar>
+                <Revelar atraso={70}>
+                  <p className="text-[16.5px] text-tinta2 leading-[1.7]">
+                    A equipe cresce projeto a projeto, conforme o que cada trabalho pede, sem inflar
+                    quadro nem terceirizar sem avisar. O{" "}
+                    <Link href="/projetos" className="text-tinta border-b border-linha2 transition-colors hover:border-ember">portfólio</Link>{" "}
+                    mostra a amplitude: de aplicativos autorais a sistemas internos de gestão.
+                  </p>
+                </Revelar>
+              </div>
+              <Revelar atraso={120}>
+                <div className="relative aspect-[4/5] max-w-[420px] overflow-hidden border border-linha bg-painel lg:ml-auto">
+                  <img src="/hero/00-cristal-poster.jpg" alt="Cristal Nexus Hub" className="h-full w-full object-cover opacity-60" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-papel/90 via-papel/20 to-transparent" />
+                  <span className="absolute bottom-5 left-5 right-5 font-mono text-[10.5px] tracking-[.2em] uppercase text-tinta2">Nexus Hub · estúdio de software</span>
+                </div>
               </Revelar>
             </div>
             <Revelar>
