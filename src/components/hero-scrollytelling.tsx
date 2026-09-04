@@ -5,7 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 
-type Posicao = "centro" | "esquerda" | "direita";
+// "baixo" põe a leitura rente à borda inferior, no eixo da imagem; os outros
+// dois jogam o texto para um lado enquanto a câmera empurra a imagem para o
+// oposto. É o que substitui o texto centralizado da versão anterior.
+type Posicao = "baixo" | "esquerda" | "direita";
 
 type Bloco = {
   olho: string;
@@ -27,7 +30,7 @@ const BLOCOS: Bloco[] = [
     poster: "/hero/00-cristal-poster.jpg",
     video: "/hero/00-cristal.mp4",
     cta: true,
-    posicao: "centro",
+    posicao: "baixo",
   },
   {
     olho: "Sites e páginas de venda",
@@ -54,7 +57,7 @@ const BLOCOS: Bloco[] = [
     imagem: "/hero/03-app.png",
     poster: "/hero/03-app-poster.jpg",
     video: "/hero/03-app.mp4",
-    posicao: "centro",
+    posicao: "baixo",
   },
   {
     olho: "Automações e bots",
@@ -81,7 +84,7 @@ const BLOCOS: Bloco[] = [
     imagem: "/hero/06-ia.png",
     poster: "/hero/06-ia-poster.jpg",
     video: "/hero/06-ia.mp4",
-    posicao: "centro",
+    posicao: "baixo",
   },
 ];
 
@@ -100,14 +103,14 @@ const FPS = 24;
 type Camera = { x: number; zoom: number };
 
 const ENQUADRAMENTO: Record<Posicao, Camera> = {
-  centro: { x: 0, zoom: 1.16 },
+  baixo: { x: 0, zoom: 1.16 },
   esquerda: { x: 11, zoom: 1.28 }, // texto à esquerda, imagem empurrada pra direita
   direita: { x: -11, zoom: 1.28 }, // texto à direita, imagem empurrada pra esquerda
 };
 
 // De onde a câmera parte no primeiro quadro da página: mesmo eixo do capítulo
 // de abertura, só que mais fechada, pra abertura já nascer com um recuo lento.
-const CAMERA_INICIAL: Camera = { x: 0, zoom: 1.3 };
+const CAMERA_INICIAL: Camera = { x: 0, zoom: 1.32 };
 
 function limite01(v: number) {
   return Math.min(1, Math.max(0, v));
@@ -153,7 +156,11 @@ export function HeroScrollytelling() {
   const cameraRef = useRef<HTMLDivElement>(null);
   const videosRef = useRef<(HTMLVideoElement | null)[]>([]);
   const textosRef = useRef<(HTMLDivElement | null)[]>([]);
+  const ticksRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const barraRef = useRef<HTMLDivElement>(null);
+  const rolarRef = useRef<HTMLDivElement>(null);
   const progressoRef = useRef(0);
+  const capituloRef = useRef(-1);
   const reduzMovimento = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
@@ -220,6 +227,22 @@ export function HeroScrollytelling() {
         const alvo = Math.round(t * duracao * FPS) / FPS;
         if (Math.abs(alvo - video.currentTime) >= 0.5 / FPS) video.currentTime = alvo;
       }
+
+      // Cromo da Direção A: barra de avanço no rodapé do hero, indicador de
+      // rolagem que sai de cena assim que o leitor entende o gesto, e o índice
+      // lateral, que só é reescrito na virada de capítulo porque tem transição
+      // de CSS própria e reescrever todo quadro a reiniciaria.
+      if (barraRef.current) barraRef.current.style.width = `${(p * 100).toFixed(2)}%`;
+      if (rolarRef.current) rolarRef.current.style.opacity = p > 0.04 ? "0" : "1";
+
+      if (capituloRef.current !== indice) {
+        ticksRef.current.forEach((tick, j) => {
+          if (!tick) return;
+          tick.style.width = j === indice ? "34px" : "14px";
+          tick.style.background = j === indice ? "#f0f1f6" : "#363d50";
+        });
+        capituloRef.current = indice;
+      }
     });
 
     return () => cancelAnimationFrame(quadro);
@@ -227,7 +250,7 @@ export function HeroScrollytelling() {
 
   if (reduzMovimento) {
     return (
-      <section id="servicos" className="relative overflow-hidden border-b border-linha bg-papel">
+      <section id="hero" className="relative overflow-hidden border-b border-linha bg-papel">
         <Image
           src={BLOCOS[0].imagem}
           alt=""
@@ -237,7 +260,7 @@ export function HeroScrollytelling() {
           className="object-cover opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-papel/80 via-papel/70 to-papel" />
-        <div className="relative max-w-6xl mx-auto px-5 pt-24 pb-16 grid gap-14">
+        <div className="relative secao pt-32 pb-20 grid gap-14">
           {BLOCOS.map((bloco) => (
             <BlocoEstatico key={bloco.titulo} bloco={bloco} />
           ))}
@@ -250,9 +273,9 @@ export function HeroScrollytelling() {
 
   return (
     <section
-      id="servicos"
+      id="hero"
       ref={containerRef}
-      className="relative border-b border-linha bg-papel"
+      className="relative bg-papel"
       style={{ height: `${BLOCOS.length * CAPITULO_VH}vh` }}
     >
       {/* Prende o hero na tela até o último capítulo terminar; depois a página
@@ -304,14 +327,24 @@ export function HeroScrollytelling() {
           )}
         </div>
 
-        {/* Fora da câmera, então não sofre o zoom nem o empurrão lateral. */}
+        {/* Véu constante, fora da câmera: não sofre o zoom nem o empurrão, e
+            por não mudar de um capítulo pro outro atravessa o corte sem
+            piscar. A vinheta radial fecha os cantos. */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: VEU_BASE }}
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(11,13,19,0.62) 0%, rgba(11,13,19,0.18) 30%, rgba(11,13,19,0.28) 62%, rgba(11,13,19,0.86) 100%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(11,13,19,0.5) 100%)",
+          }}
         />
 
-        {/* Texto e véu de legibilidade ficam fora da câmera: quem se move é a
-            imagem, a leitura fica firme no lugar dela. */}
         {BLOCOS.map((bloco, indice) => (
           <div
             key={bloco.titulo}
@@ -325,66 +358,127 @@ export function HeroScrollytelling() {
               className="absolute inset-0 pointer-events-none"
               style={{ background: GRADIENTE_TEXTO[bloco.posicao] }}
             />
-            <div className="absolute inset-0 flex items-center">
-              {/* Largura total com recuo nas bordas, em vez de uma caixa
-                  centralizada: numa tela larga a caixa central jogava o texto
-                  "da esquerda" por cima do meio da tela, e o alinhamento
-                  lateral não se lia. */}
-              <div className={`w-full px-[clamp(1.25rem,7vw,7rem)] flex ${ALINHO_TEXTO[bloco.posicao]}`}>
-                <div className={bloco.cta ? "max-w-2xl" : "max-w-xl"}>
-                  <p className="olho">{bloco.olho}</p>
-                  <h2
-                    className={
-                      bloco.cta
-                        ? "mt-4 text-[clamp(2.1rem,5.4vw,3.6rem)] font-bold leading-[1.1] text-balance"
-                        : "mt-4 text-[clamp(1.7rem,4vw,2.6rem)] font-bold leading-[1.15] text-balance"
-                    }
-                  >
-                    {bloco.titulo}
-                  </h2>
-                  <p className="mt-5 text-lg text-tinta2 leading-relaxed max-w-xl">{bloco.corpo}</p>
-                  {bloco.cta && (
-                    <div
-                      className={`mt-8 flex flex-wrap gap-3 ${
-                        bloco.posicao === "centro" ? "justify-center" : "justify-start"
-                      }`}
-                    >
-                      <Link href="/solicitar" className="btn-p">Solicitar orçamento</Link>
-                      <Link href="/projetos" className="btn-s">Ver projetos</Link>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <TextoCapitulo bloco={bloco} indice={indice} />
           </div>
         ))}
+
+        {/* Índice de capítulos. Traço largo marca onde você está. */}
+        <div className="absolute right-[clamp(1.5rem,5vw,6rem)] top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-3.5 items-end pointer-events-none">
+          {BLOCOS.map((bloco, indice) => (
+            <span
+              key={bloco.titulo}
+              ref={(el) => {
+                ticksRef.current[indice] = el;
+              }}
+              className="block h-px transition-[width,background-color] duration-[450ms] ease-[cubic-bezier(.16,1,.3,1)]"
+              style={{
+                width: indice === 0 ? "34px" : "14px",
+                background: indice === 0 ? "#f0f1f6" : "#363d50",
+              }}
+            />
+          ))}
+        </div>
+
+        <div
+          ref={rolarRef}
+          className="absolute left-1/2 bottom-8 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none transition-opacity duration-[600ms]"
+        >
+          <span className="font-mono text-[10px] tracking-[0.28em] uppercase text-suave">Role</span>
+          <span className="w-px h-11 bg-gradient-to-b from-ember to-transparent" />
+        </div>
+
+        <div className="absolute left-0 right-0 bottom-0 h-px bg-linha">
+          <div ref={barraRef} className="h-px bg-ember" style={{ width: "0%" }} />
+        </div>
       </div>
     </section>
   );
 }
 
-// Véu constante sobre todos os capítulos. Como não muda de um capítulo pro
-// outro, atravessa o corte sem piscar, e é ele que garante um piso de contraste
-// mesmo quando cai um quadro claro do vídeo por baixo do texto.
-const VEU_BASE =
-  "linear-gradient(to bottom, rgba(11,13,19,0.46) 0%, rgba(11,13,19,0.14) 34%, rgba(11,13,19,0.2) 60%, rgba(11,13,19,0.55) 100%)";
-
-// Por cima do véu, escurece o lado onde o texto do capítulo está. Acompanha o
-// texto (aparece e some junto com ele), então some antes do corte.
+// Cada posição escurece o lado onde a leitura está: rodapé inteiro para o
+// texto de baixo, um flanco para os laterais. Acompanha o texto, então some
+// antes do corte junto com ele.
 const GRADIENTE_TEXTO: Record<Posicao, string> = {
-  centro:
-    "radial-gradient(ellipse 76% 60% at 50% 56%, rgba(11,13,19,0.84) 0%, rgba(11,13,19,0.5) 52%, transparent 78%)",
+  baixo:
+    "linear-gradient(to top, rgba(11,13,19,0.9) 0%, rgba(11,13,19,0.55) 42%, rgba(11,13,19,0.15) 78%, transparent 100%)",
   esquerda:
-    "linear-gradient(100deg, rgba(11,13,19,0.88) 0%, rgba(11,13,19,0.74) 24%, rgba(11,13,19,0.38) 50%, transparent 72%)",
+    "linear-gradient(100deg, rgba(11,13,19,0.92) 0%, rgba(11,13,19,0.72) 30%, rgba(11,13,19,0.28) 56%, transparent 76%)",
   direita:
-    "linear-gradient(260deg, rgba(11,13,19,0.88) 0%, rgba(11,13,19,0.74) 24%, rgba(11,13,19,0.38) 50%, transparent 72%)",
+    "linear-gradient(260deg, rgba(11,13,19,0.92) 0%, rgba(11,13,19,0.72) 30%, rgba(11,13,19,0.28) 56%, transparent 76%)",
 };
 
-const ALINHO_TEXTO: Record<Posicao, string> = {
-  centro: "justify-center text-center",
-  esquerda: "justify-start text-left",
-  direita: "justify-end text-left",
-};
+function TextoCapitulo({ bloco, indice }: { bloco: Bloco; indice: number }) {
+  const numero = String(indice).padStart(2, "0");
+
+  if (bloco.posicao === "baixo") {
+    return (
+      <div className="absolute inset-0 flex items-end">
+        <div className="secao w-full pb-[clamp(7.5rem,16vh,11.25rem)]">
+          <div className={bloco.cta ? "max-w-[17ch]" : "max-w-[34ch]"}>
+            {bloco.cta ? (
+              <div className="flex items-center gap-4 mb-[clamp(1.25rem,3vh,2rem)]">
+                <span className="font-extrabold text-[13px] tracking-[0.32em] uppercase text-tinta">
+                  Nexus
+                </span>
+                <span className="h-px w-12 bg-ember shrink-0" />
+                <span className="olho-suave">{bloco.olho}</span>
+              </div>
+            ) : (
+              <div className="flex items-baseline gap-3.5 mb-[22px]">
+                <span className="font-mono text-[12px] tracking-[0.1em] text-ember">{numero}</span>
+                <span className="olho-suave">{bloco.olho}</span>
+              </div>
+            )}
+
+            {bloco.cta ? (
+              <h1 className="text-[clamp(2.6rem,6.4vw,6.2rem)] font-bold leading-[0.95] tracking-[-0.035em] text-balance">
+                {bloco.titulo}
+              </h1>
+            ) : (
+              <h2 className="text-[clamp(1.9rem,4.4vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.03em] text-balance">
+                {bloco.titulo}
+              </h2>
+            )}
+
+            <p className="mt-[clamp(1.375rem,3.4vh,2.25rem)] text-[clamp(1rem,1.35vw,1.25rem)] text-leitura leading-[1.55] max-w-[46ch]">
+              {bloco.corpo}
+            </p>
+
+            {bloco.cta && (
+              <div className="mt-[clamp(1.75rem,4vh,2.75rem)] flex flex-wrap gap-3.5 items-center">
+                <Link href="/solicitar" className="btn-p">
+                  Preencher o briefing <span className="font-mono font-medium">→</span>
+                </Link>
+                <Link href="#projetos" className="btn-s">Ver projetos</Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const aoLado = bloco.posicao === "esquerda" ? "justify-start" : "justify-end";
+
+  return (
+    <div className="absolute inset-0 flex items-center">
+      <div className={`secao w-full flex ${aoLado}`}>
+        <div className="max-w-[30ch]">
+          <div className="flex items-baseline gap-3.5 mb-[22px]">
+            <span className="font-mono text-[12px] tracking-[0.1em] text-ember">{numero}</span>
+            <span className="olho-suave">{bloco.olho}</span>
+          </div>
+          <h2 className="text-[clamp(1.9rem,4.4vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.03em] text-balance">
+            {bloco.titulo}
+          </h2>
+          <p className="mt-[22px] text-[clamp(1rem,1.2vw,1.15rem)] text-leitura leading-[1.6]">
+            {bloco.corpo}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function BlocoEstatico({ bloco }: { bloco: Bloco }) {
   return (
@@ -394,7 +488,7 @@ function BlocoEstatico({ bloco }: { bloco: Bloco }) {
       <p className="mt-5 text-lg text-tinta2 leading-relaxed">{bloco.corpo}</p>
       {bloco.cta && (
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/solicitar" className="btn-p">Solicitar orçamento</Link>
+          <Link href="/solicitar" className="btn-p">Preencher o briefing</Link>
           <Link href="/projetos" className="btn-s">Ver projetos</Link>
         </div>
       )}

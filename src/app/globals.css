@@ -1,14 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Direção A: Archivo carrega display e corpo, IBM Plex Mono fica para
+     rótulos, numeração e microtexto. */
+  --font-display: Archivo, "Helvetica Neue", Helvetica, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: Archivo, "Helvetica Neue", Helvetica, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
   --color-papel: #0b0d13;
   --color-cartao: #151824;
   --color-cartao2: #1b1f2c;
+  --color-painel: #101219;
   --color-tinta: #f0f1f6;
+  /* Cinza claro de leitura da Direção A, um degrau acima de tinta2. */
+  --color-leitura: #c8cddb;
   --color-tinta2: #a6adc0;
   --color-suave: #7b8296;
   --color-linha: #262b3a;
@@ -55,10 +60,11 @@
     color: var(--color-tinta);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.03em; }
   ::selection { background: var(--color-acento-borda); color: var(--color-tinta); }
-  :focus-visible { outline: 2px solid var(--color-acento-forte); outline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--color-acento-forte); outline-offset: 4px; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -98,21 +104,38 @@
 .vinheta-topo { animation: vinheta-respirar 7s ease-in-out infinite; }
 
 @layer components {
+  /* Medida e recuo padrão da Direção A: largura ampla, respiro grande nas
+     bordas, sem caixa central estreita. */
+  .secao { @apply max-w-[1440px] mx-auto px-[clamp(1.5rem,5vw,6rem)]; }
+
   .cartao {
     @apply bg-cartao border border-linha rounded-2xl shadow-[0_16px_40px_-28px_rgba(0,0,0,.9)];
   }
+
+  /* Botões da Direção A: retangulares, rótulo em caixa alta espaçada. O
+     primário é o bloco claro que sobe no hover; o secundário é só contorno. */
   .btn, .btn-p, .btn-s {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-[15px] transition-colors border border-transparent cursor-pointer;
+    @apply inline-flex items-center justify-center gap-3 border border-transparent cursor-pointer
+           transition-[transform,background-color,border-color,color] duration-300;
   }
-  .btn-p { @apply bg-acento text-white shadow-[0_10px_24px_-10px_rgba(106,88,232,.65)]; }
-  .btn-p:hover { @apply bg-acento-forte; }
-  .btn-s { @apply bg-cartao text-tinta border-linha2; }
-  .btn-s:hover { @apply border-acento text-acento-forte; }
+  .btn-p {
+    @apply bg-tinta text-papel px-7 py-[18px] text-[14px] font-bold uppercase tracking-[0.06em];
+  }
+  .btn-p:hover { @apply -translate-y-[3px] bg-white text-papel; }
+  .btn-s {
+    @apply text-tinta px-6 py-[18px] border-linha2 font-mono text-[12px] tracking-[0.14em] uppercase;
+  }
+  .btn-s:hover { @apply border-ember text-ember; }
+
   .campo {
     @apply w-full bg-cartao2 border border-linha2 rounded-xl px-3.5 py-2.5 text-base text-tinta
            placeholder:text-suave/75 focus:border-acento focus:outline-none focus:ring-[3px] focus:ring-acento/25;
   }
   .rotulo { @apply block font-semibold text-base leading-snug text-tinta; }
   .selo { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
-  .olho { @apply font-mono text-[11px] tracking-[0.16em] uppercase text-acento-forte; }
+
+  /* Rótulo de seção. Ember é a cor de sinalização da Direção A; a variante
+     suave marca numeração e legendas que não devem puxar o olho. */
+  .olho { @apply font-mono text-[11px] tracking-[0.22em] uppercase text-ember; }
+  .olho-suave { @apply font-mono text-[11px] tracking-[0.22em] uppercase text-suave; }
 }
