@@ -47,17 +47,17 @@ export function FormularioBriefing() {
 
   if (!modo) {
     return (
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+      <div className="mt-12 grid gap-0 border-t border-linha sm:grid-cols-2">
         {([
           ["rapido", "5 a 7 minutos", "Versão rápida", "O essencial para a gente entender a ideia e dar uma estimativa inicial de prazo e valor."],
           ["completo", "15 a 20 minutos", "Versão completa", "Todos os detalhes: funcionalidades, domínio, hospedagem, banco de dados, prazo e manutenção. Gera uma proposta bem mais precisa."],
         ] as const).map(([id, tempo, titulo, texto]) => (
           <button key={id} onClick={() => { setModo(id); guardar(id, dados); }}
-                  className="cartao p-6 text-left hover:border-acento hover:-translate-y-0.5 transition-all">
-            <span className="olho">{tempo}</span>
-            <h2 className="mt-2 text-[21px] font-bold">{titulo}</h2>
-            <p className="mt-1.5 text-[14.5px] text-suave leading-relaxed">{texto}</p>
-            <span className="mt-3 inline-block text-[14px] font-semibold text-acento">Começar →</span>
+                  className="border-b border-linha p-7 text-left transition-colors hover:bg-[#12141c] sm:pr-10 sm:last:border-l sm:last:pl-10">
+            <span className="font-mono text-[11px] tracking-[.2em] uppercase text-suave">{tempo}</span>
+            <h2 className="mt-5 text-[clamp(1.6rem,3vw,2.6rem)] font-bold leading-[1.04] tracking-[-.03em]">{titulo}</h2>
+            <p className="mt-4 text-[15.5px] text-suave leading-[1.7]">{texto}</p>
+            <span className="mt-7 inline-flex items-center gap-3 font-mono text-[12px] tracking-[.14em] uppercase text-tinta">Começar <span>→</span></span>
           </button>
         ))}
       </div>
@@ -106,7 +106,7 @@ export function FormularioBriefing() {
     const invalido = Boolean(erros[c.id]);
 
     return (
-      <div key={c.id} data-campo={c.id} className="py-5 border-t border-linha">
+      <div key={c.id} data-campo={c.id} className="py-7 border-t border-linha">
         <div className="flex items-start gap-2">
           <label htmlFor={`f-${c.id}`} className="rotulo flex-1">
             {c.r} {c.req && <span className="text-erro">*</span>}
@@ -114,8 +114,8 @@ export function FormularioBriefing() {
           {c.i && (
             <button type="button" onClick={() => alternarInfo(c.id)} title="O que é isso?"
                     aria-expanded={!!infos[c.id]}
-                    className={`shrink-0 w-[23px] h-[23px] rounded-full border text-[13px] font-display font-bold grid place-items-center transition-colors ${
-                      infos[c.id] ? "bg-acento text-white border-acento" : "bg-acento-fundo text-acento border-acento-borda hover:bg-acento hover:text-white"
+                    className={`shrink-0 w-[23px] h-[23px] border text-[13px] font-display font-bold grid place-items-center transition-colors ${
+                      infos[c.id] ? "bg-ember text-papel border-ember" : "bg-transparent text-ember border-ember-borda hover:bg-ember hover:text-papel"
                     }`}>
               i<span className="sr-only"> O que é isso?</span>
             </button>
@@ -123,7 +123,7 @@ export function FormularioBriefing() {
         </div>
 
         {c.i && infos[c.id] && (
-          <p className="mt-2.5 rounded-xl bg-acento-fundo border border-acento-borda p-3.5 text-[14.5px] text-tinta2 leading-relaxed">
+          <p className="mt-3 border border-acento-borda bg-acento-fundo p-4 text-[14.5px] text-tinta2 leading-relaxed">
             {c.i}
           </p>
         )}
@@ -133,7 +133,7 @@ export function FormularioBriefing() {
           <textarea id={`f-${c.id}`} className="campo min-h-24 leading-relaxed" placeholder={c.ph}
                     value={(v as string) || ""} onChange={(e) => definir(c.id, e.target.value)} />
         ) : c.t === "escolha" || c.t === "multipla" ? (
-          <div className={`grid gap-2 ${invalido ? "outline outline-1 outline-erro outline-offset-[6px] rounded-xl" : ""}`}>
+          <div className={`grid gap-px max-w-[680px] ${invalido ? "outline outline-1 outline-erro outline-offset-[6px]" : ""}`}>
             {c.o?.map((o) => {
               const texto = opTexto(o);
               const dica = opDica(o);
@@ -141,8 +141,8 @@ export function FormularioBriefing() {
               const marcado = multi ? Array.isArray(v) && v.includes(texto) : v === texto;
               return (
                 <label key={texto}
-                       className={`flex gap-3 items-start p-3 rounded-xl border cursor-pointer transition-colors ${
-                         marcado ? "border-acento bg-acento-fundo" : "border-linha bg-cartao2 hover:border-linha2"
+                       className={`flex gap-3 items-start p-4 border cursor-pointer transition-colors ${
+                         marcado ? "border-ember bg-[#15131a]" : "border-linha bg-transparent hover:border-linha2"
                        }`}>
                   <input type={multi ? "checkbox" : "radio"} name={`n-${c.id}`} value={texto} checked={marcado}
                          className="mt-0.5 w-[17px] h-[17px] accent-[var(--color-acento)] shrink-0"
@@ -172,9 +172,9 @@ export function FormularioBriefing() {
 
   return (
     <>
-      <div className="sticky top-14 z-30 -mx-5 px-5 py-2.5 bg-papel/90 backdrop-blur border-b border-linha flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full bg-linha overflow-hidden">
-          <div className="h-full bg-acento rounded-full transition-[width] duration-300"
+      <div className="sticky top-[76px] z-30 -mx-5 px-5 py-3 bg-papel/90 backdrop-blur border-y border-linha flex items-center gap-4">
+        <div className="flex-1 h-px bg-linha overflow-hidden">
+          <div className="h-full bg-ember transition-[width] duration-300"
                style={{ width: `${todos.length ? (respondidos / todos.length) * 100 : 0}%` }} />
         </div>
         <span className="font-mono text-xs text-suave tabular-nums">{respondidos}/{todos.length}</span>
@@ -191,25 +191,25 @@ export function FormularioBriefing() {
       </div>
 
       {secoes.map((s, i) => (
-        <section key={s.id} className="cartao p-6 my-5">
+        <section key={s.id} className="my-14 border-t border-linha pt-8">
           <div className="flex gap-3.5 items-start">
-            <span className="shrink-0 w-[30px] h-[30px] rounded-lg bg-acento-fundo text-acento font-mono text-[13px] grid place-items-center mt-0.5">
+            <span className="shrink-0 font-mono text-[clamp(1.6rem,3vw,2.6rem)] leading-none text-linha2 mt-0.5">
               {i + 1}
             </span>
             <div>
-              <h3 className="text-[21px] font-bold">{s.titulo}</h3>
-              <p className="mt-1 text-[14.5px] text-suave leading-relaxed">{s.resumo}</p>
+              <h3 className="text-[clamp(1.5rem,3vw,2.4rem)] font-bold leading-[1.05] tracking-[-.03em]">{s.titulo}</h3>
+              <p className="mt-2 text-[14.5px] text-suave leading-[1.7]">{s.resumo}</p>
             </div>
           </div>
           {s.nota && (
-            <div className="mt-4 rounded-xl bg-acento-fundo border border-acento-borda p-4 text-[14.5px] text-tinta2 leading-relaxed"
+            <div className="mt-6 border-l-2 border-ember bg-acento-fundo p-4 text-[14.5px] text-tinta2 leading-relaxed"
                  dangerouslySetInnerHTML={{ __html: s.nota }} />
           )}
           {camposDoModo(s, modo).map(renderCampo)}
         </section>
       ))}
 
-      {falha && <p className="rounded-xl bg-erro-fundo border border-erro/30 p-4 text-[14.5px] font-semibold text-erro">{falha}</p>}
+      {falha && <p className="border-l-2 border-erro bg-erro-fundo p-4 text-[14.5px] font-semibold text-erro">{falha}</p>}
 
       <div className="flex flex-wrap gap-3 mt-6">
         <button onClick={enviar} disabled={enviando} className="btn-p disabled:opacity-60">
