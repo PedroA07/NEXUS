@@ -9,6 +9,30 @@ type Modo = "rapido" | "completo";
 type Respostas = Record<string, string | string[]>;
 const CHAVE = "nexus-hub-briefing-wizard";
 
+function campoSeAplica(campo: Campo, respostas: Respostas) {
+  const tipo = respostas.tipo;
+  const plataformas = Array.isArray(respostas.plataformas) ? respostas.plataformas : [];
+  const pagamentos = Array.isArray(respostas.pagamentos) ? respostas.pagamentos : [];
+  const integracoes = Array.isArray(respostas.integracoes) ? respostas.integracoes : [];
+  const dadosPessoais = Array.isArray(respostas.dadosPessoais) ? respostas.dadosPessoais : [];
+
+  if (campo.id === "existenteLink") return Boolean(respostas.existente) && respostas.existente !== "Não, é do zero" && respostas.existente !== "Não sei";
+  if (campo.id === "plataformas") return !["Automação / robô", "Painel de dados e relatórios", "Inteligência artificial"].includes(String(tipo));
+  if (campo.id === "offline") return plataformas.some((valor) => /Android|iPhone|Windows|Mac/.test(valor));
+  if (["logo", "identidade", "estilo"].includes(campo.id)) return ["Site institucional", "Página única de vendas", "Loja virtual", "Sistema interno / painel de gestão", "Aplicativo de celular", "Jogo", "Ainda não sei, preciso de ajuda pra decidir", "Outro (explico abaixo)"].includes(String(tipo));
+  if (["textos", "imagens"].includes(campo.id)) return ["Site institucional", "Página única de vendas", "Loja virtual"].includes(String(tipo));
+  if (["dominio", "emailProf"].includes(campo.id)) return !["Programa de computador", "Jogo"].includes(String(tipo));
+  if (["banco"].includes(campo.id)) return tipo !== "Página única de vendas";
+  if (campo.id === "backup") return Boolean(respostas.banco) && respostas.banco !== "Acho que não vou precisar guardar informações";
+  if (campo.id === "lojas") return tipo === "Aplicativo de celular" || plataformas.some((valor) => /Android|iPhone/.test(valor));
+  if (campo.id === "pagamentos") return ["Site institucional", "Página única de vendas", "Loja virtual", "Sistema interno / painel de gestão", "Aplicativo de celular", "Jogo"].includes(String(tipo));
+  if (campo.id === "gateway") return pagamentos.length > 0 && !pagamentos.includes("Não vou receber pagamento pelo sistema");
+  if (campo.id === "integracoesQuais") return integracoes.includes("Sistema que já uso (ERP, CRM, sistema do contador)");
+  if (campo.id === "politicas") return dadosPessoais.length > 0 && !dadosPessoais.includes("Nenhuma informação pessoal");
+  if (campo.id === "prazoData") return Boolean(respostas.prazo) && respostas.prazo !== "Sem data definida";
+  return true;
+}
+
 export function FormularioBriefingWizard() {
   const router = useRouter();
   const [modo, setModo] = useState<Modo | null>(null);
@@ -20,8 +44,8 @@ export function FormularioBriefingWizard() {
 
   const passos = useMemo(() => {
     if (!modo) return [];
-    return secoesDoModo(modo).flatMap((secao) => camposDoModo(secao, modo)).filter((campo) => campo.t !== "aviso");
-  }, [modo]);
+    return secoesDoModo(modo).flatMap((secao) => camposDoModo(secao, modo)).filter((campo) => campo.t !== "aviso" && campoSeAplica(campo, dados));
+  }, [modo, dados]);
   const campo = passos[indice];
   const respondidos = passos.filter((item) => {
     const valor = dados[item.id];
@@ -35,10 +59,14 @@ export function FormularioBriefingWizard() {
       if (salvo?.modo && salvo?.dados) {
         setModo(salvo.modo);
         setDados(salvo.dados);
-        setIndice(Math.min(salvo.indice || 0, 999));
+        setIndice(salvo.indice || 0);
       }
     } catch {}
   }, []);
+
+  useEffect(() => {
+    if (passos.length && indice >= passos.length) setIndice(passos.length - 1);
+  }, [passos.length, indice]);
 
   const salvar = (novoModo: Modo | null, novasRespostas: Respostas, novoIndice = indice) => {
     try { localStorage.setItem(CHAVE, JSON.stringify({ modo: novoModo, dados: novasRespostas, indice: novoIndice })); } catch {}
