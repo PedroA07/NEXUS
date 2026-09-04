@@ -127,10 +127,10 @@ export default async function Home() {
             <Revelar>
               <span className="olho-suave">02 — Estúdio</span>
             </Revelar>
-            <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid items-start gap-[clamp(2.5rem,6vw,6rem)] lg:grid-cols-[1.25fr_0.85fr]">
+            <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid items-start gap-[clamp(2.5rem,5vw,5rem)] lg:grid-cols-[1.08fr_0.92fr]">
               <div>
                 <Revelar>
-                  <blockquote className="max-w-[22ch]">
+                  <blockquote className="max-w-[30ch]">
                     <p className="text-[clamp(2rem,5.4vw,4.6rem)] font-bold leading-[1] tracking-[-0.035em]">
                       Cada projeto merece ser resolvido <em className="not-italic text-ember">do zero</em> para o problema real de quem pede.
                     </p>
