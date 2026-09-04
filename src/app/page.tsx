@@ -127,15 +127,16 @@ export default async function Home() {
             <Revelar>
               <span className="olho-suave">02 — Estúdio</span>
             </Revelar>
-            <Revelar>
-              <blockquote className="mt-[clamp(2rem,5vh,3.5rem)] max-w-[22ch]">
-                <p className="text-[clamp(2rem,5.4vw,4.6rem)] font-bold leading-[1] tracking-[-0.035em]">
-                  Cada projeto merece ser resolvido do zero para o problema real de quem pede.
-                </p>
-              </blockquote>
-            </Revelar>
-            <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid gap-[clamp(2rem,6vw,6rem)] lg:grid-cols-[1.15fr_1fr] items-start">
-              <div className="grid gap-8 sm:grid-cols-2 max-w-[1000px]">
+            <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid items-start gap-[clamp(2.5rem,6vw,6rem)] lg:grid-cols-[1.25fr_0.85fr]">
+              <div>
+                <Revelar>
+                  <blockquote className="max-w-[22ch]">
+                    <p className="text-[clamp(2rem,5.4vw,4.6rem)] font-bold leading-[1] tracking-[-0.035em]">
+                      Cada projeto merece ser resolvido <em className="not-italic text-ember">do zero</em> para o problema real de quem pede.
+                    </p>
+                  </blockquote>
+                </Revelar>
+                <div className="mt-[clamp(2.5rem,6vh,4.5rem)] grid gap-8 sm:grid-cols-2">
                 <Revelar>
                   <p className="text-[16.5px] text-tinta2 leading-[1.7]">
                     Nada de molde pronto. A Nexus nasceu de um jeito simples de pensar software:
@@ -150,9 +151,10 @@ export default async function Home() {
                     mostra a amplitude: de aplicativos autorais a sistemas internos de gestão.
                   </p>
                 </Revelar>
+                </div>
               </div>
               <Revelar atraso={120}>
-                <div className="relative aspect-[4/5] max-w-[420px] overflow-hidden border border-linha bg-painel lg:ml-auto">
+                <div className="relative aspect-[4/5] w-full max-w-[420px] overflow-hidden border border-linha bg-painel lg:ml-auto">
                   <img src="/hero/00-cristal-poster.jpg" alt="Cristal Nexus Hub" className="h-full w-full object-cover opacity-60" />
                   <span className="absolute inset-0 bg-gradient-to-t from-papel/90 via-papel/20 to-transparent" />
                   <span className="absolute bottom-5 left-5 right-5 font-mono text-[10.5px] tracking-[.2em] uppercase text-tinta2">Nexus Hub · estúdio de software</span>
