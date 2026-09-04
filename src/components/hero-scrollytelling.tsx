@@ -411,10 +411,16 @@ function TextoCapitulo({ bloco, indice }: { bloco: Bloco; indice: number }) {
   const numero = String(indice).padStart(2, "0");
 
   if (bloco.posicao === "baixo") {
+    // O recuo no topo é folga para telas baixas: alinhado ao rodapé, um bloco
+    // mais alto que a área útil transborda para cima, e sem essa margem ele
+    // entraria por baixo do cabeçalho.
     return (
-      <div className="absolute inset-0 flex items-end">
-        <div className="secao w-full pb-[clamp(7.5rem,16vh,11.25rem)]">
-          <div className={bloco.cta ? "max-w-[17ch]" : "max-w-[34ch]"}>
+      <div className="absolute inset-0 flex items-end pt-24">
+        <div className="secao w-full pb-[clamp(4.5rem,12vh,8rem)]">
+          {/* Medida em rem, não em ch: `ch` resolve contra o font-size do
+              próprio elemento, então num contêiner que herda o corpo ele vira
+              uma tira estreita e quebra o título em uma palavra por linha. */}
+          <div className={bloco.cta ? "max-w-[min(58rem,92vw)]" : "max-w-[min(42rem,90vw)]"}>
             {bloco.cta ? (
               <div className="flex items-center gap-4 mb-[clamp(1.25rem,3vh,2rem)]">
                 <span className="font-extrabold text-[13px] tracking-[0.32em] uppercase text-tinta">
@@ -431,7 +437,10 @@ function TextoCapitulo({ bloco, indice }: { bloco: Bloco; indice: number }) {
             )}
 
             {bloco.cta ? (
-              <h1 className="text-[clamp(2.6rem,6.4vw,6.2rem)] font-bold leading-[0.95] tracking-[-0.035em] text-balance">
+              // Teto de 5rem em vez dos 6.2rem do desenho: acima disso o
+              // título de abertura passa de quatro linhas num notebook de
+              // 768px de altura e encosta no cabeçalho.
+              <h1 className="text-[clamp(2.4rem,5.4vw,5rem)] font-bold leading-[0.98] tracking-[-0.035em] text-balance">
                 {bloco.titulo}
               </h1>
             ) : (
@@ -446,10 +455,10 @@ function TextoCapitulo({ bloco, indice }: { bloco: Bloco; indice: number }) {
 
             {bloco.cta && (
               <div className="mt-[clamp(1.75rem,4vh,2.75rem)] flex flex-wrap gap-3.5 items-center">
-                <Link href="/solicitar" className="btn-p">
+                <Link href="/solicitar" className="btn-p whitespace-nowrap">
                   Preencher o briefing <span className="font-mono font-medium">→</span>
                 </Link>
-                <Link href="#projetos" className="btn-s">Ver projetos</Link>
+                <Link href="#projetos" className="btn-s whitespace-nowrap">Ver projetos</Link>
               </div>
             )}
           </div>
@@ -463,7 +472,8 @@ function TextoCapitulo({ bloco, indice }: { bloco: Bloco; indice: number }) {
   return (
     <div className="absolute inset-0 flex items-center">
       <div className={`secao w-full flex ${aoLado}`}>
-        <div className="max-w-[30ch]">
+        {/* Mesma correção do bloco de baixo: medida em rem, não em ch. */}
+        <div className="max-w-[min(34rem,80vw)]">
           <div className="flex items-baseline gap-3.5 mb-[22px]">
             <span className="font-mono text-[12px] tracking-[0.1em] text-ember">{numero}</span>
             <span className="olho-suave">{bloco.olho}</span>
