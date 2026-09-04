@@ -9,6 +9,31 @@ export default async function Projetos() {
   const sb = await criarClienteServidor();
   const { data: projetos } = await sb
     .from("portfolio").select("*").eq("publicado", true).order("ordem");
+  const destaques = projetos?.filter((projeto) => projeto.destaque).slice(0, 3) ?? [];
+  const outros = projetos?.filter((projeto) => !projeto.destaque) ?? [];
+
+  const renderProjeto = (p: NonNullable<typeof projetos>[number], invertido: boolean, ultimo: boolean) => (
+    <article key={p.slug} id={p.slug} className={`border-t border-linha py-10 scroll-mt-20 lg:grid lg:grid-cols-[1fr_1.15fr] lg:gap-16 lg:items-center ${ultimo ? "border-b" : ""}`}>
+      <div className={`mb-8 aspect-[16/10] border border-linha bg-[#101219] grid place-items-center lg:mb-0 ${invertido ? "lg:order-2" : ""}`}>
+        <span className="text-[clamp(1.5rem,3vw,2.8rem)] font-bold tracking-[-.04em] text-tinta text-center px-6">{p.titulo}</span>
+      </div>
+      <div className={invertido ? "lg:order-1" : ""}>
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <span className="font-mono text-[11px] tracking-[.2em] uppercase text-ember">{p.categoria}</span>
+          <span className="font-mono text-xs text-suave">{p.ano}</span>
+        </div>
+        <h2 className="mt-4 text-[clamp(1.7rem,3.2vw,2.8rem)] font-bold leading-[1.04] tracking-[-.032em]">{p.titulo}</h2>
+        <p className="mt-4 text-[16.5px] text-tinta2 leading-[1.65] max-w-[44ch]">{p.resumo}</p>
+        {p.descricao && <p className="mt-3 text-[15.5px] text-suave leading-[1.7] max-w-[46ch]">{p.descricao}</p>}
+        {p.stack?.length > 0 && (
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {p.stack.map((s: string) => <li key={s} className="border border-linha px-2.5 py-1.5 text-[11px] text-suave font-mono">{s}</li>)}
+          </ul>
+        )}
+        {p.link && <a href={p.link} target="_blank" rel="noreferrer" className="mt-5 inline-block font-mono text-[12px] tracking-[.14em] uppercase text-tinta border-b border-linha2 pb-1 hover:border-ember">Abrir projeto →</a>}
+      </div>
+    </article>
+  );
 
   return (
     <>
@@ -33,35 +58,18 @@ export default async function Projetos() {
           </p>
         ) : (
           <div className="mt-16">
-            {projetos.map((p) => (
-              <article key={p.slug} id={p.slug} className="border-t border-linha py-10 scroll-mt-20 lg:grid lg:grid-cols-[1fr_1.15fr] lg:gap-16 lg:items-center">
-                <div className="mb-8 aspect-[16/10] border border-linha bg-[#101219] grid place-items-center lg:mb-0">
-                  <span className="text-[clamp(1.5rem,3vw,2.8rem)] font-bold tracking-[-.04em] text-tinta">{p.titulo}</span>
-                </div>
-                <div>
-                <div className="flex items-baseline justify-between gap-3 flex-wrap">
-                  <span className="font-mono text-[11px] tracking-[.2em] uppercase text-ember">{p.categoria}</span>
-                  <span className="font-mono text-xs text-suave">{p.ano}</span>
-                </div>
-                <h2 className="mt-4 text-[clamp(1.7rem,3.2vw,2.8rem)] font-bold leading-[1.04] tracking-[-.032em]">{p.titulo}</h2>
-                <p className="mt-4 text-[16.5px] text-tinta2 leading-[1.65] max-w-[44ch]">{p.resumo}</p>
-                {p.descricao && <p className="mt-3 text-[15.5px] text-suave leading-[1.7] max-w-[46ch]">{p.descricao}</p>}
-                {p.stack?.length > 0 && (
-                  <ul className="mt-5 flex flex-wrap gap-2">
-                    {p.stack.map((s: string) => (
-                      <li key={s} className="border border-linha px-2.5 py-1.5 text-[11px] text-suave font-mono">{s}</li>
-                    ))}
-                  </ul>
-                )}
-                {p.link && (
-                  <a href={p.link} target="_blank" rel="noreferrer"
-                     className="mt-5 inline-block font-mono text-[12px] tracking-[.14em] uppercase text-tinta border-b border-linha2 pb-1 hover:text-tinta hover:border-ember">
-                    Abrir projeto →
-                  </a>
-                )}
-                </div>
-              </article>
-            ))}
+            {destaques.length > 0 && (
+              <section aria-labelledby="projetos-destaque">
+                <span id="projetos-destaque" className="font-mono text-[11px] tracking-[.22em] uppercase text-suave">Em destaque</span>
+                <div className="mt-6">{destaques.map((p, i) => renderProjeto(p, i % 2 === 1, i === destaques.length - 1 && outros.length === 0))}</div>
+              </section>
+            )}
+            {outros.length > 0 && (
+              <section aria-labelledby="projetos-outros" className={destaques.length > 0 ? "mt-[clamp(5rem,12vh,8.75rem)]" : ""}>
+                <span id="projetos-outros" className="font-mono text-[11px] tracking-[.22em] uppercase text-suave">Também no portfólio</span>
+                <div className="mt-6">{outros.map((p, i) => renderProjeto(p, i % 2 === 1, i === outros.length - 1))}</div>
+              </section>
+            )}
           </div>
         )}
 
