@@ -91,10 +91,16 @@ const BLOCOS: Bloco[] = [
 // Rolagem que cada capítulo consome. O clipe inteiro é rasgado nesse trecho.
 const CAPITULO_VH = 100;
 
-// Os clipes do hero são todos reencodados em 24 fps all-intra. Arredondar o
+// Os clipes do hero são todos reencodados em 48 fps all-intra. Arredondar o
 // currentTime pra grade de quadros evita mandar o decodificador buscar de novo
 // por diferenças menores que um quadro, que ele nem chegaria a pintar.
-const FPS = 24;
+//
+// Precisa bater com o fps real dos arquivos: a fonte tinha 124 quadros para
+// 100vh de rolagem, ou seja, um quadro novo a cada 8,7px numa tela de 1080px,
+// e um clique de roda pulava onze quadros de uma vez. Foi isso que lia como
+// travamento. Com 48 fps a densidade dobra; deixar esta constante em 24
+// desperdiçaria exatamente os quadros que passaram a existir.
+const FPS = 48;
 
 // Enquadramento de cada capítulo: o vídeo é ampliado e empurrado pro lado
 // oposto ao do texto, pra imagem e leitura ocuparem metades diferentes da
