@@ -14,8 +14,9 @@ export default async function Projetos() {
 
   const renderProjeto = (p: NonNullable<typeof projetos>[number], invertido: boolean, ultimo: boolean) => (
     <article key={p.slug} id={p.slug} className={`border-t border-linha py-10 scroll-mt-20 lg:grid lg:grid-cols-[1fr_1.15fr] lg:gap-16 lg:items-center ${ultimo ? "border-b" : ""}`}>
-      <div className={`mb-8 aspect-[16/10] border border-linha bg-[#101219] grid place-items-center lg:mb-0 ${invertido ? "lg:order-2" : ""}`}>
-        <span className="text-[clamp(1.5rem,3vw,2.8rem)] font-bold tracking-[-.04em] text-tinta text-center px-6">{p.titulo}</span>
+      <div className={`group relative mb-8 aspect-[16/10] overflow-hidden border border-linha bg-[#101219] grid place-items-center lg:mb-0 ${invertido ? "lg:order-2" : ""}`} style={{ backgroundImage: "repeating-linear-gradient(45deg, #151824 0, #151824 3px, #101219 3px, #101219 7px)" }}>
+        <span className="text-center px-6 text-[clamp(1.5rem,3vw,2.8rem)] font-bold tracking-[-.04em] text-tinta transition-transform duration-500 group-hover:scale-[1.03]">{p.titulo}</span>
+        <span className="absolute bottom-3.5 left-4 font-mono text-[10px] tracking-[.2em] uppercase text-suave">{p.categoria || "Projeto"} · {p.ano}</span>
       </div>
       <div className={invertido ? "lg:order-1" : ""}>
         <div className="flex items-baseline justify-between gap-3 flex-wrap">
