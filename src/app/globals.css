@@ -108,9 +108,7 @@
      bordas, sem caixa central estreita. */
   .secao { @apply max-w-[1440px] mx-auto px-[clamp(1.5rem,5vw,6rem)]; }
 
-  .cartao {
-    @apply bg-cartao border border-linha rounded-2xl shadow-[0_16px_40px_-28px_rgba(0,0,0,.9)];
-  }
+  .cartao { @apply bg-cartao border border-linha; }
 
   /* Botões da Direção A: retangulares, rótulo em caixa alta espaçada. O
      primário é o bloco claro que sobe no hover; o secundário é só contorno. */
@@ -128,11 +126,11 @@
   .btn-s:hover { @apply border-ember text-ember; }
 
   .campo {
-    @apply w-full bg-cartao2 border border-linha2 rounded-xl px-3.5 py-2.5 text-base text-tinta
-           placeholder:text-suave/75 focus:border-acento focus:outline-none focus:ring-[3px] focus:ring-acento/25;
+      @apply w-full bg-transparent border-0 border-b border-linha2 px-0 py-2.5 text-base text-tinta
+        placeholder:text-suave/75 focus:border-ember focus:outline-none focus:ring-0;
   }
   .rotulo { @apply block font-semibold text-base leading-snug text-tinta; }
-  .selo { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
+    .selo { @apply inline-flex items-center gap-1.5 border border-linha px-2.5 py-1 text-xs font-semibold; }
 
   /* Rótulo de seção. Ember é a cor de sinalização da Direção A; a variante
      suave marca numeração e legendas que não devem puxar o olho. */

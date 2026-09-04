@@ -17,7 +17,7 @@ export function FormularioEntrar() {
         <input id="senha" name="senha" type="password" required autoComplete="current-password" className="campo" />
       </div>
       {estado && !estado.ok && (
-        <p className="rounded-xl bg-erro-fundo border border-erro/25 p-3 text-[14px] font-semibold text-erro">
+        <p className="border-l-2 border-erro bg-erro-fundo p-3 text-[14px] font-semibold text-erro">
           {estado.msg}
         </p>
       )}

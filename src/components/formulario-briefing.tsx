@@ -93,7 +93,7 @@ export function FormularioBriefing() {
   const renderCampo = (c: Campo) => {
     if (c.t === "aviso") {
       return (
-        <div key={c.id} className="my-6 rounded-2xl bg-ambar-fundo border border-ambar-linha p-5">
+        <div key={c.id} className="my-6 border-l-2 border-ember bg-ambar-fundo p-5">
           <h3 className="font-display font-bold text-[16.5px] text-ambar">{c.r}</h3>
           {c.p?.map((par, i) => (
             <p key={i} className="mt-2.5 text-[14.5px] text-tinta2 leading-relaxed">{par}</p>
