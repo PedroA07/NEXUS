@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import { camposDoModo, opDica, opTexto, secoesDoModo, type Campo } from "@/lib/briefing";
+import { useReducedMotion } from "motion/react";
+import { opDica, opTexto, type Campo } from "@/lib/briefing";
+import { montarPlano, type Modo, type PassoBriefing } from "@/lib/briefing-plano";
 import { lerRaioX, type Respostas } from "@/lib/briefing-raiox";
 import { BriefingMaquete } from "./briefing-maquete";
 import { BriefingAberturaCena } from "./briefing-abertura-cena";
 import { enviarBriefing } from "@/app/acoes";
 
-type Modo = "rapido" | "completo";
 const CHAVE = "nexus-hub-briefing-wizard";
-const REVISAO = "__revisao";
-
-type PassoWizard = { id: string; cap: string; campo: Campo | null };
+/** Tempo que a resposta única fica visível marcada antes de avançar sozinha. */
+const ESPERA_AUTOAVANCO = 450;
 
 type Rascunho = { modo: Modo; dados: Respostas; indice: number };
 
@@ -34,7 +34,7 @@ function campoSeAplica(campo: Campo, respostas: Respostas) {
   if (["logo", "identidade", "estilo"].includes(campo.id)) return ["Site institucional", "Página única de vendas", "Loja virtual", "Sistema interno / painel de gestão", "Aplicativo de celular", "Jogo", "Ainda não sei, preciso de ajuda pra decidir", "Outro (explico abaixo)"].includes(String(tipo));
   if (["textos", "imagens"].includes(campo.id)) return ["Site institucional", "Página única de vendas", "Loja virtual"].includes(String(tipo));
   if (["dominio", "emailProf"].includes(campo.id)) return !["Programa de computador", "Jogo"].includes(String(tipo));
-  if (["banco"].includes(campo.id)) return tipo !== "Página única de vendas";
+  if (campo.id === "banco") return tipo !== "Página única de vendas";
   if (campo.id === "backup") return Boolean(respostas.banco) && respostas.banco !== "Acho que não vou precisar guardar informações";
   if (campo.id === "lojas") return tipo === "Aplicativo de celular" || plataformas.some((valor) => /Android|iPhone/.test(valor));
   if (campo.id === "pagamentos") return ["Site institucional", "Página única de vendas", "Loja virtual", "Sistema interno / painel de gestão", "Aplicativo de celular", "Jogo"].includes(String(tipo));
@@ -45,20 +45,8 @@ function campoSeAplica(campo: Campo, respostas: Respostas) {
   return true;
 }
 
-const NAO_PRECISA = [
-  "Saber programar",
-  "Conhecer termos técnicos",
-  "Ter as funções definidas",
-  "Saber quanto vai custar",
-];
-
-const SO_PRECISA = [
-  "Contar o que tem em mente",
-  "Explicar o problema",
-  "Dizer o que quer alcançar",
-  "O resto construímos juntos",
-];
-
+const NAO_PRECISA = ["Saber programar", "Conhecer termos técnicos", "Ter as funções definidas", "Saber quanto vai custar"];
+const SO_PRECISA = ["Contar o que tem em mente", "Explicar o problema", "Dizer o que quer alcançar", "O resto construímos juntos"];
 const COMO_FUNCIONA: [string, string][] = [
   ["Você conta", "sua ideia e o problema"],
   ["A gente organiza", "as perguntas conforme suas respostas"],
@@ -66,11 +54,16 @@ const COMO_FUNCIONA: [string, string][] = [
   ["A Nexus Hub analisa", "e volta com os próximos passos"],
 ];
 
+const tipoDoCampo = (t: Campo["t"]) =>
+  t === "tel" ? "tel" : t === "email" ? "email" : t === "data" ? "date" : "text";
+
 export function FormularioBriefingWizard() {
   const router = useRouter();
+  const reduzMovimento = useReducedMotion();
   const [modo, setModo] = useState<Modo | null>(null);
   const [dados, setDados] = useState<Respostas>({});
   const [indice, setIndice] = useState(0);
+  const [direcao, setDirecao] = useState(1);
   const [erro, setErro] = useState("");
   const [falha, setFalha] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -78,23 +71,39 @@ export function FormularioBriefingWizard() {
   const [salvo, setSalvo] = useState(false);
   const [rascunho, setRascunho] = useState<Rascunho | null>(null);
 
-  const passos = useMemo<PassoWizard[]>(() => {
+  const passos = useMemo<PassoBriefing[]>(() => {
     if (!modo) return [];
-    const campos = secoesDoModo(modo).flatMap((secao) =>
-      camposDoModo(secao, modo)
-        .filter((campo) => campo.t !== "aviso" && campoSeAplica(campo, dados))
-        .map((campo) => ({ id: campo.id, cap: secao.titulo, campo })),
-    );
-    return [...campos, { id: REVISAO, cap: "Revisão", campo: null }];
+    return montarPlano(modo).filter((p) => p.tipo !== "campo" || campoSeAplica(p.campo, dados));
   }, [modo, dados]);
 
   const atual = passos[indice];
   const raiox = useMemo(() => lerRaioX(dados), [dados]);
   const percentual = passos.length > 1 ? (indice / (passos.length - 1)) * 100 : 0;
 
-  /* Capítulos da trilha: corridas consecutivas de passos que vieram da mesma
-     seção. Agrupar por corrida, e não por seção, mantém a ordem da trilha
-     igual à ordem real das perguntas depois do filtro condicional. */
+  const preenchido = (campo: Campo) => {
+    const v = dados[campo.id];
+    return Array.isArray(v) ? v.length > 0 : Boolean(v && String(v).trim());
+  };
+
+  const respondido = (passo: PassoBriefing): boolean => {
+    if (passo.tipo === "campo") return preenchido(passo.campo);
+    if (passo.tipo === "grupo") return passo.campos.filter((c) => c.req).every(preenchido);
+    return false;
+  };
+
+  const obrigatorioOk = (passo: PassoBriefing) => {
+    if (passo.tipo === "campo") return !passo.campo.req || preenchido(passo.campo);
+    if (passo.tipo === "grupo") return passo.campos.filter((c) => c.req).every(preenchido);
+    return true;
+  };
+
+  const avisoDe = (passo: PassoBriefing) =>
+    passo.tipo === "grupo"
+      ? "Precisamos do seu nome e do WhatsApp para conseguir te responder."
+      : "Precisamos dessa resposta para continuar.";
+
+  /* Capítulos: corridas consecutivas do mesmo `cap`, para a trilha refletir a
+     ordem real das perguntas depois do filtro condicional. */
   const capitulos = useMemo(() => {
     const saida: { nome: string; ids: string[] }[] = [];
     for (const passo of passos) {
@@ -108,9 +117,7 @@ export function FormularioBriefingWizard() {
   useEffect(() => {
     try {
       const guardado = JSON.parse(localStorage.getItem(CHAVE) || "null");
-      if (guardado?.modo && guardado?.dados && Object.keys(guardado.dados).length) {
-        setRascunho(guardado as Rascunho);
-      }
+      if (guardado?.modo && guardado?.dados && Object.keys(guardado.dados).length) setRascunho(guardado as Rascunho);
     } catch {
       /* rascunho ilegível: começa do zero */
     }
@@ -120,17 +127,12 @@ export function FormularioBriefingWizard() {
     if (passos.length && indice >= passos.length) setIndice(passos.length - 1);
   }, [passos.length, indice]);
 
-  const salvar = (novoModo: Modo | null, novasRespostas: Respostas, novoIndice = indice) => {
+  const salvar = (m: Modo | null, d: Respostas, i = indice) => {
     try {
-      localStorage.setItem(CHAVE, JSON.stringify({ modo: novoModo, dados: novasRespostas, indice: novoIndice }));
+      localStorage.setItem(CHAVE, JSON.stringify({ modo: m, dados: d, indice: i }));
     } catch {
-      /* armazenamento cheio ou bloqueado: segue sem rascunho */
+      /* armazenamento bloqueado: segue sem rascunho */
     }
-  };
-
-  const piscarSalvo = () => {
-    setSalvo(true);
-    window.setTimeout(() => setSalvo(false), 1400);
   };
 
   const definir = (id: string, valor: string | string[]) => {
@@ -138,54 +140,23 @@ export function FormularioBriefingWizard() {
     setDados(novo);
     setErro("");
     salvar(modo, novo);
-    piscarSalvo();
+    setSalvo(true);
+    window.setTimeout(() => setSalvo(false), 1400);
   };
 
-  const respondido = (passo: PassoWizard) => {
-    if (!passo.campo) return false;
-    const valor = dados[passo.campo.id];
-    return Array.isArray(valor) ? valor.length > 0 : Boolean(valor && String(valor).trim());
-  };
-
-  const iniciar = (novoModo: Modo, deIndice = 0) => {
-    setModo(novoModo);
-    setIndice(deIndice);
-    setRascunho(null);
-    salvar(novoModo, dados, deIndice);
-  };
-
-  const retomar = () => {
-    if (!rascunho) return;
-    setDados(rascunho.dados);
-    setModo(rascunho.modo);
-    setIndice(rascunho.indice || 0);
-    setRascunho(null);
-  };
-
-  const descartar = () => {
-    try {
-      localStorage.removeItem(CHAVE);
-    } catch {
-      /* nada a limpar */
-    }
-    setRascunho(null);
-  };
-
-  const irPara = (id: string) => {
-    const k = passos.findIndex((passo) => passo.id === id);
-    if (k < 0) return;
-    setIndice(k);
+  const irParaIndice = (alvo: number, dir: number) => {
+    setDirecao(dir);
+    setIndice(alvo);
     setErro("");
-    setGaveta(false);
-    salvar(modo, dados, k);
+    salvar(modo, dados, alvo);
   };
 
   const enviar = async () => {
     if (!modo) return;
-    const faltando = passos.find((passo) => passo.campo?.req && !respondido(passo));
+    const faltando = passos.find((p) => !obrigatorioOk(p));
     if (faltando) {
-      setIndice(passos.indexOf(faltando));
-      setErro("Responda esta pergunta para continuar.");
+      irParaIndice(passos.indexOf(faltando), -1);
+      setErro(avisoDe(faltando));
       return;
     }
     setEnviando(true);
@@ -206,18 +177,15 @@ export function FormularioBriefingWizard() {
 
   const continuar = () => {
     if (!atual) return;
-    if (atual.id === REVISAO) {
+    if (atual.tipo === "revisao") {
       void enviar();
       return;
     }
-    if (atual.campo?.req && !respondido(atual)) {
-      setErro("Responda esta pergunta para continuar.");
+    if (!obrigatorioOk(atual)) {
+      setErro(avisoDe(atual));
       return;
     }
-    const proximo = Math.min(indice + 1, passos.length - 1);
-    setIndice(proximo);
-    setErro("");
-    salvar(modo, dados, proximo);
+    irParaIndice(Math.min(indice + 1, passos.length - 1), 1);
   };
 
   const voltar = () => {
@@ -225,8 +193,32 @@ export function FormularioBriefingWizard() {
       setModo(null);
       return;
     }
-    setIndice(indice - 1);
-    setErro("");
+    irParaIndice(indice - 1, -1);
+  };
+
+  /* O auto-avanço dispara depois que o estado já assentou, então a validação
+     do passo corrente enxerga a resposta recém-marcada. */
+  const continuarRef = useRef(continuar);
+  continuarRef.current = continuar;
+  const timerRef = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timerRef.current), []);
+
+  const escolherUnica = (campo: Campo, texto: string) => {
+    definir(campo.id, texto);
+    window.clearTimeout(timerRef.current);
+    if (reduzMovimento) {
+      timerRef.current = window.setTimeout(() => continuarRef.current(), 0);
+      return;
+    }
+    timerRef.current = window.setTimeout(() => continuarRef.current(), ESPERA_AUTOAVANCO);
+  };
+
+  const iniciar = (m: Modo, de = 0) => {
+    setModo(m);
+    setIndice(de);
+    setDirecao(1);
+    setRascunho(null);
+    salvar(m, dados, de);
   };
 
   useEffect(() => {
@@ -242,7 +234,7 @@ export function FormularioBriefingWizard() {
       if (ev.key === "Enter" && !ev.shiftKey) {
         if (alvo?.tagName === "TEXTAREA" && !ev.metaKey && !ev.ctrlKey) return;
         ev.preventDefault();
-        continuar();
+        continuarRef.current();
       }
       if (!emTexto && ev.key === "ArrowLeft") {
         ev.preventDefault();
@@ -250,14 +242,29 @@ export function FormularioBriefingWizard() {
       }
       if (!emTexto && ev.key === "ArrowRight") {
         ev.preventDefault();
-        continuar();
+        continuarRef.current();
       }
     };
     window.addEventListener("keydown", aoTeclar);
     return () => window.removeEventListener("keydown", aoTeclar);
   });
 
-  const respondidos = passos.filter((passo) => respondido(passo));
+  const respondidos = passos.filter(respondido);
+
+  const textoDe = (passo: PassoBriefing, curto = true) => {
+    if (passo.tipo === "grupo") {
+      return passo.campos.map((c) => dados[c.id]).filter(Boolean).join(" · ");
+    }
+    if (passo.tipo !== "campo") return "";
+    const v = dados[passo.campo.id];
+    if (Array.isArray(v)) {
+      return curto && v.length > 2 ? `${v.slice(0, 2).join(", ")} +${v.length - 2}` : v.join(", ");
+    }
+    return String(v || "");
+  };
+
+  const rotuloDe = (passo: PassoBriefing) =>
+    passo.tipo === "campo" ? passo.campo.r : passo.tipo === "grupo" ? "Contato" : "Revisão";
 
   /* ---------------------------------------------------------------- */
   /* abertura                                                          */
@@ -280,11 +287,11 @@ export function FormularioBriefingWizard() {
 
             <div className="mt-[clamp(1.75rem,4vh,2.75rem)] grid gap-[clamp(1.25rem,3vw,2.5rem)] sm:grid-cols-2">
               <div>
-                <span className="block font-mono text-[10.5px] tracking-[.2em] uppercase text-[#5c6377]">Você não precisa</span>
+                <span className="block font-mono text-[10.5px] tracking-[.2em] uppercase text-suave2">Você não precisa</span>
                 <ul className="mt-3.5 m-0 p-0 list-none grid gap-2.5">
                   {NAO_PRECISA.map((item) => (
                     <li key={item} className="grid grid-cols-[16px_1fr] gap-2.5 items-baseline">
-                      <span aria-hidden className="text-[#5c6377] text-[12px]">—</span>
+                      <span aria-hidden className="text-suave2 text-[12px]">—</span>
                       <span className="text-[14.5px] text-suave leading-[1.5]">{item}</span>
                     </li>
                   ))}
@@ -305,12 +312,11 @@ export function FormularioBriefingWizard() {
           </div>
 
           <div>
-            <figure className="m-0 border border-linha bg-[#0d0f16] p-[clamp(20px,3vw,32px)] aspect-[16/10]">
+            <figure className="m-0 border border-linha bg-painel2 p-[clamp(20px,3vw,32px)] aspect-[16/10]">
               <BriefingAberturaCena />
             </figure>
-
             <div className="mt-[clamp(1.5rem,3.4vh,2.25rem)]">
-              <span className="block font-mono text-[10.5px] tracking-[.2em] uppercase text-[#5c6377]">Como funciona</span>
+              <span className="block font-mono text-[10.5px] tracking-[.2em] uppercase text-suave2">Como funciona</span>
               <ol className="mt-4 m-0 p-0 list-none grid">
                 {COMO_FUNCIONA.map(([forte, resto], i) => (
                   <li
@@ -340,7 +346,7 @@ export function FormularioBriefingWizard() {
           <button
             type="button"
             onClick={() => iniciar("rapido")}
-            className="text-left bg-painel border border-linha p-[clamp(26px,3.4vw,40px)] cursor-pointer transition-[border-color,background-color,transform] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:border-linha2 hover:bg-[#12141c] hover:-translate-y-0.5"
+            className="text-left bg-painel border border-linha p-[clamp(26px,3.4vw,40px)] cursor-pointer transition-[border-color,background-color,transform] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:border-linha3 hover:bg-cartao-hover hover:-translate-y-0.5"
           >
             <span className="olho-suave">5 a 7 minutos</span>
             <span className="block mt-[18px] text-[clamp(1.4rem,2.4vw,2rem)] font-bold leading-[1.08] tracking-[-.028em] text-tinta">Versão rápida</span>
@@ -350,7 +356,7 @@ export function FormularioBriefingWizard() {
           <button
             type="button"
             onClick={() => iniciar("completo")}
-            className="text-left bg-painel border border-ember-borda p-[clamp(26px,3.4vw,40px)] cursor-pointer transition-[border-color,background-color,transform] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:border-ember hover:bg-[#12141c] hover:-translate-y-0.5"
+            className="text-left bg-painel border border-ember-borda p-[clamp(26px,3.4vw,40px)] cursor-pointer transition-[border-color,background-color,transform] duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:border-ember hover:bg-cartao-hover hover:-translate-y-0.5"
           >
             <span className="olho">15 a 20 min · recomendado</span>
             <span className="block mt-[18px] text-[clamp(1.4rem,2.4vw,2rem)] font-bold leading-[1.08] tracking-[-.028em] text-tinta">Versão completa</span>
@@ -361,14 +367,32 @@ export function FormularioBriefingWizard() {
 
         {rascunho && (
           <div className="mt-7 border-l-2 border-ember pl-5 py-1">
-            <p className="text-[15.5px] text-leitura leading-[1.6]">
-              Encontramos um briefing em andamento neste navegador.
-            </p>
+            <p className="text-[15.5px] text-leitura leading-[1.6]">Encontramos um briefing em andamento neste navegador.</p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <button type="button" onClick={retomar} className="btn-p px-[22px] py-3.5 text-[13px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setDados(rascunho.dados);
+                  setModo(rascunho.modo);
+                  setIndice(rascunho.indice || 0);
+                  setRascunho(null);
+                }}
+                className="btn-p px-[22px] py-3.5 text-[13px]"
+              >
                 Continuar de onde parei
               </button>
-              <button type="button" onClick={descartar} className="btn-s px-[22px] py-3.5 text-[11.5px]">
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    localStorage.removeItem(CHAVE);
+                  } catch {
+                    /* nada a limpar */
+                  }
+                  setRascunho(null);
+                }}
+                className="btn-s px-[22px] py-3.5 text-[11.5px]"
+              >
                 Começar de novo
               </button>
             </div>
@@ -380,74 +404,53 @@ export function FormularioBriefingWizard() {
 
   if (!atual) return null;
 
-  const campo = atual.campo;
-  const valor = campo ? dados[campo.id] : undefined;
-  const multipla = campo?.t === "multipla";
-  const escolhas = campo?.t === "escolha" || multipla;
-  const capAtual = atual.cap;
-
   const listaRespostas = (
     <div className="grid gap-4">
       {respondidos.length === 0 ? (
-        <p className="text-[13.5px] text-suave leading-[1.6]">
-          Suas respostas aparecem aqui conforme você avança.
-        </p>
+        <p className="text-[13.5px] text-suave2 leading-[1.6]">Suas respostas aparecem aqui conforme você avança.</p>
       ) : (
-        respondidos.map((passo) => {
-          const v = dados[passo.campo!.id];
-          const texto = Array.isArray(v)
-            ? v.length > 2
-              ? `${v.slice(0, 2).join(", ")} +${v.length - 2}`
-              : v.join(", ")
-            : String(v || "");
-          return (
-            <button
-              key={passo.id}
-              type="button"
-              onClick={() => irPara(passo.id)}
-              className="grid gap-1.5 text-left group"
-            >
-              <span className="font-mono text-[10px] tracking-[.18em] uppercase text-[#5c6377]">
-                {passo.campo!.r}
-              </span>
-              <span className="text-[14px] text-leitura leading-[1.45] transition-colors group-hover:text-ember">
-                {texto}
-              </span>
-            </button>
-          );
-        })
+        respondidos.map((passo) => (
+          <button
+            key={passo.id}
+            type="button"
+            onClick={() => {
+              setGaveta(false);
+              irParaIndice(passos.indexOf(passo), passos.indexOf(passo) > indice ? 1 : -1);
+            }}
+            className="grid gap-1.5 text-left group"
+          >
+            <span className="font-mono text-[10px] tracking-[.18em] uppercase text-suave2">{rotuloDe(passo)}</span>
+            <span className="text-[14px] text-leitura leading-[1.45] transition-colors group-hover:text-ember">{textoDe(passo)}</span>
+          </button>
+        ))
       )}
     </div>
   );
 
-  /* ---------------------------------------------------------------- */
-  /* wizard                                                            */
-  /* ---------------------------------------------------------------- */
+  const animacao: CSSProperties | undefined = reduzMovimento
+    ? undefined
+    : ({ animation: "wizard-entra .42s cubic-bezier(.16,1,.3,1) both", "--dx": direcao === -1 ? "-14px" : "14px" } as CSSProperties);
 
   return (
     <div className="mt-12 -mx-6 sm:-mx-[clamp(24px,5vw,96px)] border-t border-linha">
       <header className="sticky top-[76px] z-30 border-b border-linha bg-papel/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1360px] items-center gap-4 px-6 py-3 sm:px-[clamp(24px,5vw,96px)]">
-          <div className="hidden xl:flex flex-1 min-w-0 items-center gap-1 overflow-hidden">
+          <div className="hidden min-[1220px]:flex flex-1 min-w-0 items-center gap-1 overflow-hidden">
             {capitulos.map((cap) => {
+              const ativo = cap.nome === atual.cap;
               const feito = cap.ids.every((id) => {
                 const p = passos.find((x) => x.id === id);
-                return p ? p.id === REVISAO || respondido(p) : false;
+                return p ? p.tipo === "revisao" || respondido(p) : false;
               });
-              const ativo = cap.nome === capAtual;
               return (
                 <button
                   key={cap.nome + cap.ids[0]}
                   type="button"
-                  onClick={() => irPara(cap.ids[0])}
+                  onClick={() => irParaIndice(passos.findIndex((p) => p.id === cap.ids[0]), -1)}
                   aria-current={ativo ? "step" : undefined}
                   title={`Ir para ${cap.nome}`}
                   className={`shrink-0 px-2.5 py-1.5 font-mono text-[10.5px] tracking-[.14em] uppercase whitespace-nowrap border-b transition-[color,border-color] duration-300 ${
-                    ativo
-                      ? "text-tinta border-ember"
-                      : feito
-                        ? "text-tinta2 border-transparent hover:text-tinta"
-                        : "text-[#5c6377] border-transparent hover:text-tinta2"
+                    ativo ? "text-tinta border-ember" : feito ? "text-tinta2 border-transparent hover:text-tinta" : "text-suave2 border-transparent hover:text-tinta2"
                   }`}
                 >
                   {cap.nome}
@@ -456,18 +459,16 @@ export function FormularioBriefingWizard() {
             })}
           </div>
 
-          <span className="font-mono text-[11px] tracking-[.18em] uppercase text-suave whitespace-nowrap xl:hidden">
-            {modo === "rapido" ? "Versão rápida" : "Versão completa"}
+          <span className="font-mono text-[11px] tracking-[.18em] uppercase text-suave whitespace-nowrap min-[1220px]:hidden">
+            {atual.cap}
           </span>
-
-          <div className="h-px flex-1 bg-linha xl:hidden">
+          <div className="h-px flex-1 bg-linha min-[1220px]:hidden">
             <div className="h-px bg-ember transition-[width] duration-500" style={{ width: `${percentual}%` }} />
           </div>
 
           <span className="font-mono text-[12px] text-tinta2 tabular-nums whitespace-nowrap">
             {String(indice + 1).padStart(2, "0")} / {String(passos.length).padStart(2, "0")}
           </span>
-
           <button
             type="button"
             onClick={() => iniciar(modo === "rapido" ? "completo" : "rapido", 0)}
@@ -476,196 +477,156 @@ export function FormularioBriefingWizard() {
             Versão {modo === "rapido" ? "completa" : "rápida"}
           </button>
         </div>
-        <div className="h-0.5 bg-[#151824]">
+        <div className="h-0.5 bg-cartao">
           <div className="h-0.5 bg-ember transition-[width] duration-500 ease-[cubic-bezier(.16,1,.3,1)]" style={{ width: `${percentual}%` }} />
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[1360px] gap-12 px-6 py-10 sm:px-[clamp(24px,4vw,56px)] lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+      <div className="mx-auto grid max-w-[1360px] gap-12 px-6 py-10 sm:px-[clamp(24px,4vw,56px)] min-[1100px]:grid-cols-[minmax(0,1fr)_320px] min-[1100px]:gap-16">
         <main className="min-h-[min(56vh,520px)]">
-          {atual.id === REVISAO ? (
-            <>
-              <span className="olho">Revisão</span>
-              <h2 className="mt-[18px] max-w-[20ch] text-[clamp(1.6rem,3.4vw,2.9rem)] font-bold leading-[1.05] tracking-[-.03em] text-balance">
-                Tudo pronto?
-              </h2>
-              <p className="mt-4 max-w-[54ch] text-[16px] text-tinta2 leading-[1.65]">
-                Reunimos suas respostas abaixo. Clique em qualquer item para voltar e alterar.
-                Depois de enviar, a gente analisa a ideia e volta com os próximos passos.
-              </p>
+          <div key={indice} style={animacao}>
+            {atual.tipo === "revisao" ? (
+              <>
+                <span className="olho">{atual.olho}</span>
+                <h2 className="mt-[18px] max-w-[20ch] text-[clamp(1.6rem,3.4vw,2.9rem)] font-bold leading-[1.05] tracking-[-.03em] text-balance">Tudo pronto?</h2>
+                <p className="mt-4 max-w-[54ch] text-[16px] text-tinta2 leading-[1.65]">
+                  Reunimos suas respostas abaixo. Clique em qualquer item para voltar e alterar.
+                  Depois de enviar, a gente analisa a ideia e volta com os próximos passos.
+                </p>
 
-              <div className="mt-[clamp(26px,3.6vh,40px)] grid gap-[clamp(24px,4vw,56px)] items-start lg:grid-cols-[1.15fr_1fr]">
-                <figure className="m-0 border border-linha bg-[#0d0f16] p-[clamp(14px,2vw,22px)] aspect-[320/236]">
-                  <BriefingMaquete raiox={raiox} />
-                </figure>
-                <div>
-                  <span className="block font-mono text-[10.5px] tracking-[.2em] uppercase text-ember">Raio-X do projeto</span>
-                  <p className="mt-3.5 max-w-[40ch] text-[15px] text-tinta2 leading-[1.65]">
-                    Uma leitura inicial do que entendemos até aqui — não é o projeto final, é o
-                    retrato das suas respostas.
-                  </p>
+                <div className="mt-[clamp(26px,3.6vh,40px)] grid gap-[clamp(24px,4vw,56px)] items-start lg:grid-cols-[1.15fr_1fr]">
+                  <figure className="m-0 border border-linha bg-painel2 p-[clamp(14px,2vw,22px)] aspect-[320/236]">
+                    <BriefingMaquete raiox={raiox} />
+                  </figure>
+                  <div>
+                    <span className="block font-mono text-[10.5px] tracking-[.2em] uppercase text-ember">Raio-X do projeto</span>
+                    <p className="mt-3.5 max-w-[40ch] text-[15px] text-tinta2 leading-[1.65]">
+                      Uma leitura inicial do que entendemos até aqui — não é o projeto final, é o
+                      retrato das suas respostas.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-[clamp(26px,3.6vh,40px)] border-t border-linha pt-[clamp(20px,2.6vh,30px)] grid gap-x-[clamp(24px,4vw,56px)] [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
-                {respondidos.length === 0 ? (
-                  <p className="text-[15px] text-suave leading-[1.6]">
-                    Você ainda não respondeu nada — volte e conte um pouco da sua ideia.
-                  </p>
-                ) : (
-                  respondidos.map((passo) => {
-                    const v = dados[passo.campo!.id];
-                    const texto = Array.isArray(v) ? v.join(", ") : String(v || "");
-                    return (
+                <div className="mt-[clamp(26px,3.6vh,40px)] border-t border-linha pt-[clamp(20px,2.6vh,30px)] grid gap-x-[clamp(24px,4vw,56px)] [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+                  {respondidos.length === 0 ? (
+                    <p className="text-[15px] text-suave leading-[1.6]">Você ainda não respondeu nada — volte e conte um pouco da sua ideia.</p>
+                  ) : (
+                    respondidos.map((passo) => (
                       <button
                         key={passo.id}
                         type="button"
-                        onClick={() => irPara(passo.id)}
+                        onClick={() => irParaIndice(passos.indexOf(passo), -1)}
                         className="grid gap-1.5 text-left border-t border-linha py-4 transition-colors hover:border-ember group"
                       >
-                        <span className="font-mono text-[10px] tracking-[.2em] uppercase text-[#5c6377]">
-                          {passo.campo!.r}
-                        </span>
-                        <span className="text-[15px] text-leitura leading-[1.55] transition-colors group-hover:text-tinta">
-                          {texto}
-                        </span>
+                        <span className="font-mono text-[10px] tracking-[.2em] uppercase text-suave2">{rotuloDe(passo)}</span>
+                        <span className="text-[15px] text-leitura leading-[1.55] transition-colors group-hover:text-tinta">{textoDe(passo, false)}</span>
                       </button>
-                    );
-                  })
-                )}
-              </div>
-            </>
-          ) : (
-            campo && (
+                    ))
+                  )}
+                </div>
+              </>
+            ) : atual.tipo === "grupo" ? (
+              <>
+                <span className="olho">{atual.olho}</span>
+                <h2 className="mt-[18px] max-w-[22ch] text-[clamp(1.6rem,3.4vw,2.9rem)] font-bold leading-[1.05] tracking-[-.03em] text-balance">{atual.pergunta}</h2>
+                <div className="mt-[clamp(26px,3.6vh,40px)] grid gap-[clamp(20px,3vw,36px)] max-w-[760px] sm:grid-cols-2">
+                  {atual.campos.map((campo) => (
+                    <div key={campo.id} className="grid gap-2.5">
+                      <label htmlFor={`c-${campo.id}`} className="font-mono text-[11px] tracking-[.18em] uppercase text-tinta2">
+                        {campo.r} {campo.req && <span className="text-ember">*</span>}
+                      </label>
+                      <input
+                        id={`c-${campo.id}`}
+                        className="campo"
+                        type={tipoDoCampo(campo.t)}
+                        placeholder={campo.ph}
+                        value={(dados[campo.id] as string) || ""}
+                        onChange={(ev) => definir(campo.id, ev.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-[clamp(24px,3.4vh,36px)] max-w-[60ch] text-[13.5px] text-suave2 leading-[1.7]">{atual.nota}</p>
+              </>
+            ) : (
               <>
                 <div className="mb-10 flex items-center gap-4">
-                  <span className="font-mono text-[11px] tracking-[.2em] uppercase text-ember">{capAtual}</span>
+                  <span className="font-mono text-[11px] tracking-[.2em] uppercase text-ember">{atual.olho}</span>
                   <span className="h-px w-8 bg-linha2" />
                   <span className="font-mono text-[11px] tracking-[.18em] uppercase text-suave">
-                    {campo.req ? "Obrigatório" : "Opcional"}
+                    {atual.campo.req ? "Obrigatório" : "Opcional"}
                   </span>
                 </div>
 
-                <h2 className="max-w-[20ch] text-[clamp(1.6rem,3.4vw,2.9rem)] font-bold leading-[1.05] tracking-[-.03em] text-balance">
-                  {campo.r}
-                </h2>
-                {campo.a && <p className="mt-4 max-w-[54ch] text-[16px] text-tinta2 leading-[1.65]">{campo.a}</p>}
-                {campo.i && (
-                  <p className="mt-5 max-w-[54ch] border-l-2 border-ember bg-acento-fundo p-4 text-[14.5px] text-tinta2 leading-[1.7]">
-                    {campo.i}
-                  </p>
+                <h2 className="max-w-[22ch] text-[clamp(1.6rem,3.4vw,2.9rem)] font-bold leading-[1.05] tracking-[-.03em] text-balance">{atual.campo.r}</h2>
+                {atual.campo.a && <p className="mt-4 max-w-[54ch] text-[16px] text-tinta2 leading-[1.65]">{atual.campo.a}</p>}
+                {atual.campo.i && (
+                  <p className="mt-5 max-w-[54ch] border-l-2 border-ember bg-acento-fundo p-4 text-[14.5px] text-tinta2 leading-[1.7]">{atual.campo.i}</p>
                 )}
 
                 <div className="mt-9 max-w-[760px]">
-                  {escolhas ? (
-                    <div className="grid gap-px sm:grid-cols-2">
-                      {campo.o?.map((opcao) => {
-                        const texto = opTexto(opcao);
-                        const marcado = multipla
-                          ? Array.isArray(valor) && valor.includes(texto)
-                          : valor === texto;
-                        return (
-                          <label
-                            key={texto}
-                            className={`flex cursor-pointer items-start gap-3 border p-4 transition-colors ${
-                              marcado ? "border-ember bg-[#15131a]" : "border-linha hover:border-linha2"
-                            }`}
-                          >
-                            <input
-                              type={multipla ? "checkbox" : "radio"}
-                              name={`wizard-${campo.id}`}
-                              checked={marcado}
-                              value={texto}
-                              className="mt-1 h-4 w-4 accent-[var(--color-ember)]"
-                              onChange={(event) => {
-                                if (!multipla) return definir(campo.id, texto);
-                                const atualLista = Array.isArray(valor) ? valor : [];
-                                definir(
-                                  campo.id,
-                                  event.target.checked
-                                    ? [...atualLista, texto]
-                                    : atualLista.filter((item) => item !== texto),
-                                );
-                              }}
-                            />
-                            <span className="text-[15px] leading-[1.45]">
-                              {texto}
-                              {opDica(opcao) && <small className="mt-1 block text-[13px] text-suave">{opDica(opcao)}</small>}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  ) : campo.t === "longo" ? (
+                  {atual.campo.t === "escolha" || atual.campo.t === "multipla" ? (
+                    <Opcoes campo={atual.campo} valor={dados[atual.campo.id]} aoEscolher={escolherUnica} aoAlternar={definir} />
+                  ) : atual.campo.t === "longo" ? (
                     <textarea
                       className="campo min-h-36 resize-y leading-[1.6]"
-                      placeholder={campo.ph}
-                      value={(valor as string) || ""}
-                      onChange={(event) => definir(campo.id, event.target.value)}
+                      placeholder={atual.campo.ph}
+                      value={(dados[atual.campo.id] as string) || ""}
+                      onChange={(ev) => definir(atual.campo.id, ev.target.value)}
                     />
                   ) : (
                     <input
                       className="campo"
-                      type={campo.t === "tel" ? "tel" : campo.t === "email" ? "email" : campo.t === "data" ? "date" : "text"}
-                      placeholder={campo.ph}
-                      value={(valor as string) || ""}
-                      onChange={(event) => definir(campo.id, event.target.value)}
+                      type={tipoDoCampo(atual.campo.t)}
+                      placeholder={atual.campo.ph}
+                      value={(dados[atual.campo.id] as string) || ""}
+                      onChange={(ev) => definir(atual.campo.id, ev.target.value)}
                     />
                   )}
                 </div>
               </>
-            )
-          )}
-
-          {erro && <p className="mt-5 border-l-2 border-erro bg-erro-fundo p-3 text-[14px] font-semibold text-erro">{erro}</p>}
-          {falha && <p className="mt-5 border-l-2 border-erro bg-erro-fundo p-3 text-[14px] font-semibold text-erro">{falha}</p>}
-
-          <div className="mt-10 flex flex-wrap items-center gap-3 border-t border-linha pt-5">
-            <button type="button" onClick={voltar} className="btn-s">← Voltar</button>
-            <button
-              type="button"
-              onClick={() => setGaveta(true)}
-              className="btn-s lg:hidden"
-            >
-              Ver meu projeto
-            </button>
-            {atual.id !== REVISAO && !campo?.req && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIndice(Math.min(indice + 1, passos.length - 1));
-                  setErro("");
-                }}
-                className="font-mono text-[12px] tracking-[.14em] uppercase text-suave transition-colors hover:text-tinta"
-              >
-                Pular
-              </button>
             )}
-            <button type="button" onClick={continuar} disabled={enviando} className="btn-p ml-auto disabled:opacity-60">
-              {enviando ? "Enviando…" : atual.id === REVISAO ? "Enviar briefing" : "Continuar"}{" "}
-              <span className="font-mono font-medium">→</span>
-            </button>
           </div>
         </main>
 
-        <aside className="hidden border-l border-linha pl-7 lg:block">
+        <aside className="hidden min-[1100px]:block border-l border-linha pl-7">
           <div className="flex items-baseline justify-between gap-3">
             <span className="font-mono text-[10.5px] tracking-[.22em] uppercase text-suave">Seu projeto</span>
-            <span
-              className="font-mono text-[10px] tracking-[.14em] uppercase text-ok transition-opacity duration-300"
-              style={{ opacity: salvo ? 1 : 0 }}
-            >
+            <span className="font-mono text-[10px] tracking-[.14em] uppercase text-ok transition-opacity duration-300" style={{ opacity: salvo ? 1 : 0 }}>
               Salvo
             </span>
           </div>
-
-          <figure className="mt-[18px] m-0 border border-linha bg-[#0d0f16] p-2 aspect-[320/236]">
+          <figure className="mt-[18px] m-0 border border-linha bg-painel2 p-2 aspect-[320/236]">
             <BriefingMaquete raiox={raiox} />
           </figure>
-          <p className="mt-2.5 font-mono text-[9.5px] tracking-[.14em] uppercase text-[#5c6377]">{raiox.nota}</p>
-
+          <p className="mt-2.5 font-mono text-[9.5px] tracking-[.14em] uppercase text-suave2">{raiox.nota}</p>
           <div className="mt-5 max-h-[46vh] overflow-y-auto">{listaRespostas}</div>
         </aside>
+      </div>
+
+      {/* Rodapé fixo: navegação sempre ao alcance, sem depender de onde a
+          pergunta terminou na tela. */}
+      <div className="sticky bottom-0 z-30 border-t border-linha bg-papel/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[1360px] flex-wrap items-center gap-3 px-6 py-4 sm:px-[clamp(24px,4vw,56px)]">
+          <button type="button" onClick={voltar} className="btn-s">← Voltar</button>
+          <p role="status" aria-live="polite" className="m-0 flex-1 text-[14.5px] text-ember transition-opacity duration-300" style={{ opacity: erro || falha ? 1 : 0 }}>
+            {erro || falha || " "}
+          </p>
+          <button type="button" onClick={() => setGaveta(true)} className="btn-s">Ver meu projeto</button>
+          {atual.tipo === "campo" && !atual.campo.req && (
+            <button
+              type="button"
+              onClick={() => irParaIndice(Math.min(indice + 1, passos.length - 1), 1)}
+              className="font-mono text-[11.5px] tracking-[.14em] uppercase text-suave transition-colors hover:text-tinta"
+            >
+              Pular
+            </button>
+          )}
+          <button type="button" onClick={continuar} disabled={enviando} className="btn-p disabled:opacity-60">
+            {enviando ? "Enviando…" : atual.tipo === "revisao" ? "Enviar briefing" : atual.tipo === "grupo" ? "Revisar" : "Continuar"}{" "}
+            <span className="font-mono font-medium">→</span>
+          </button>
+        </div>
       </div>
 
       {gaveta && (
@@ -678,7 +639,7 @@ export function FormularioBriefingWizard() {
           }}
           className="fixed inset-0 z-[60] flex items-center justify-center bg-papel/[.86] backdrop-blur-[10px] p-[clamp(16px,5vw,40px)]"
         >
-          <div className="w-full max-w-[560px] bg-[#0d0f16] border border-linha p-[clamp(18px,4vw,28px)]">
+          <div className="w-full max-w-[560px] bg-painel2 border border-linha p-[clamp(18px,4vw,28px)]">
             <div className="flex items-baseline justify-between gap-4">
               <span className="font-mono text-[10.5px] tracking-[.22em] uppercase text-tinta2">Seu projeto</span>
               <button
@@ -698,6 +659,70 @@ export function FormularioBriefingWizard() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Opções de resposta. Na escolha única o cartão inteiro acende e a etapa
+ * avança sozinha; na múltipla o marcador quadrado preenche e a pessoa segue
+ * pelo botão. O input fica só para leitor de tela e teclado — quem enxerga lê
+ * o estado pela borda, como no desenho.
+ */
+function Opcoes({
+  campo,
+  valor,
+  aoEscolher,
+  aoAlternar,
+}: {
+  campo: Campo;
+  valor: string | string[] | undefined;
+  aoEscolher: (campo: Campo, texto: string) => void;
+  aoAlternar: (id: string, valor: string[]) => void;
+}) {
+  const multipla = campo.t === "multipla";
+  return (
+    <div className="grid gap-px sm:grid-cols-2">
+      {campo.o?.map((opcao) => {
+        const texto = opTexto(opcao);
+        const dica = opDica(opcao);
+        const marcado = multipla ? Array.isArray(valor) && valor.includes(texto) : valor === texto;
+        return (
+          <label
+            key={texto}
+            className={`flex cursor-pointer items-start gap-3 border p-4 transition-colors ${
+              marcado ? "border-ember bg-selecao" : "border-linha hover:border-linha3 hover:bg-cartao-hover"
+            }`}
+          >
+            <input
+              type={multipla ? "checkbox" : "radio"}
+              name={`wizard-${campo.id}`}
+              checked={marcado}
+              value={texto}
+              className="sr-only"
+              onChange={(ev) => {
+                if (!multipla) return aoEscolher(campo, texto);
+                const atual = Array.isArray(valor) ? valor : [];
+                aoAlternar(campo.id, ev.target.checked ? [...atual, texto] : atual.filter((x) => x !== texto));
+              }}
+            />
+            {multipla && (
+              <span
+                aria-hidden
+                className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center border text-[12px] transition-colors ${
+                  marcado ? "border-ember bg-ember text-papel" : "border-linha3 text-transparent"
+                }`}
+              >
+                ✓
+              </span>
+            )}
+            <span className="text-[15px] leading-[1.45]">
+              {texto}
+              {dica && <small className="mt-1 block text-[13px] text-suave">{dica}</small>}
+            </span>
+          </label>
+        );
+      })}
     </div>
   );
 }

@@ -6,7 +6,7 @@ export function Marca({ className = "" }: { className?: string }) {
       <svg viewBox="0 0 32 32" width="20" height="20" aria-hidden className="shrink-0">
         <polygon points="16,2 30,16 16,16" fill="var(--color-ember)" />
         <polygon points="30,16 16,30 16,16" fill="var(--color-acento)" />
-        <polygon points="16,30 2,16 16,16" fill="#4e3fc7" />
+        <polygon points="16,30 2,16 16,16" fill="var(--color-acento-escuro)" />
         <polygon points="2,16 16,2 16,16" fill="var(--color-acento-forte)" />
       </svg>
       <span className="inline-flex items-baseline gap-1.5">

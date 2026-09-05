@@ -11,6 +11,11 @@
   --color-cartao: #151824;
   --color-cartao2: #1b1f2c;
   --color-painel: #101219;
+  /* Superficie 1 do handoff: paineis internos, molduras de cena e maquete. */
+  --color-painel2: #0d0f16;
+  --color-cartao-hover: #12141c;
+  --color-painel3: #161a26;
+  --color-selecao: #15131a;
   --color-tinta: #f0f1f6;
   /* Cinza claro de leitura da Direção A, um degrau acima de tinta2. */
   --color-leitura: #c8cddb;
@@ -18,11 +23,18 @@
   --color-suave: #7b8296;
   --color-linha: #262b3a;
   --color-linha2: #363d50;
+  /* Borda fraca (blueprint tracejado) e borda forte (contorno de SVG, hover). */
+  --color-linha0: #1c2130;
+  --color-linha3: #4a5266;
+  --color-suave2: #5c6377;
 
   --color-acento: #6a58e8;
   --color-acento-forte: #8474f0;
   --color-acento-fundo: #1c1a33;
   --color-acento-borda: #3c3566;
+  /* Superficie roxa do slot destacado da maquete do briefing. */
+  --color-acento-selo: #1a1226;
+  --color-acento-escuro: #4e3fc7;
 
   --color-ember: #ff8a65;
   --color-ember-fundo: #2a1c15;
@@ -76,6 +88,10 @@
   }
 }
 
+@keyframes wizard-entra {
+  from { opacity: 0; transform: translate3d(var(--dx, 14px), 6px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
 @keyframes aurora-a {
   0%, 100% { transform: translate(-8%, -6%) scale(1); }
   50% { transform: translate(10%, 6%) scale(1.18); }

@@ -62,25 +62,25 @@ export function BriefingAberturaCena() {
       aria-label="Uma ideia solta virando perguntas, depois estrutura e enfim um produto"
       style={{ overflow: "visible" }}
     >
-      <circle data-ab="1" cx="34" cy="100" r="13" fill="none" stroke="#ff8a65" strokeWidth="1.5" />
-      <path data-ab="2" data-traco d="M50 100 h34" fill="none" stroke="#363d50" strokeWidth="1" />
-      <path data-ab="3" d="M92 78 h48 v30 h-32 l-8 9 v-9 h-8 z" fill="#101219" stroke="#8474f0" strokeWidth="1.5" />
-      <line data-ab="4" data-traco x1="102" y1="90" x2="132" y2="90" stroke="#8474f0" strokeWidth="2" />
-      <line data-ab="4" data-traco x1="102" y1="99" x2="122" y2="99" stroke="#4e3fc7" strokeWidth="2" />
-      <path data-ab="5" data-traco d="M146 93 h30" fill="none" stroke="#363d50" strokeWidth="1" />
-      <rect data-ab="6" x="182" y="60" width="42" height="22" fill="none" stroke="#4a5266" strokeWidth="1" />
-      <rect data-ab="6" x="182" y="92" width="42" height="22" fill="none" stroke="#4a5266" strokeWidth="1" />
-      <rect data-ab="6" x="182" y="124" width="42" height="22" fill="none" stroke="#4a5266" strokeWidth="1" />
-      <path data-ab="7" data-traco d="M224 71 h16 v64 h-16" fill="none" stroke="#363d50" strokeWidth="1" />
-      <path data-ab="7" data-traco d="M224 103 h16" fill="none" stroke="#363d50" strokeWidth="1" />
-      <rect data-ab="8" x="252" y="62" width="52" height="76" fill="#101219" stroke="#5fd68c" strokeWidth="1.5" />
-      <line data-ab="9" data-traco x1="262" y1="80" x2="294" y2="80" stroke="#363d50" strokeWidth="2" />
-      <line data-ab="9" data-traco x1="262" y1="92" x2="284" y2="92" stroke="#363d50" strokeWidth="2" />
-      <path data-ab="10" data-traco d="M264 116 l7 8 l14 -18" fill="none" stroke="#5fd68c" strokeWidth="2" strokeLinecap="square" />
-      <text data-ab="11" x="24" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="#5c6377">IDEIA</text>
-      <text data-ab="11" x="94" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="#5c6377">PERGUNTAS</text>
-      <text data-ab="11" x="180" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="#5c6377">ESTRUTURA</text>
-      <text data-ab="11" x="256" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="#5c6377">PRODUTO</text>
+      <circle data-ab="1" cx="34" cy="100" r="13" fill="none" stroke="var(--color-ember)" strokeWidth="1.5" />
+      <path data-ab="2" data-traco d="M50 100 h34" fill="none" stroke="var(--color-linha2)" strokeWidth="1" />
+      <path data-ab="3" d="M92 78 h48 v30 h-32 l-8 9 v-9 h-8 z" fill="var(--color-painel)" stroke="var(--color-acento-forte)" strokeWidth="1.5" />
+      <line data-ab="4" data-traco x1="102" y1="90" x2="132" y2="90" stroke="var(--color-acento-forte)" strokeWidth="2" />
+      <line data-ab="4" data-traco x1="102" y1="99" x2="122" y2="99" stroke="var(--color-acento-escuro)" strokeWidth="2" />
+      <path data-ab="5" data-traco d="M146 93 h30" fill="none" stroke="var(--color-linha2)" strokeWidth="1" />
+      <rect data-ab="6" x="182" y="60" width="42" height="22" fill="none" stroke="var(--color-linha3)" strokeWidth="1" />
+      <rect data-ab="6" x="182" y="92" width="42" height="22" fill="none" stroke="var(--color-linha3)" strokeWidth="1" />
+      <rect data-ab="6" x="182" y="124" width="42" height="22" fill="none" stroke="var(--color-linha3)" strokeWidth="1" />
+      <path data-ab="7" data-traco d="M224 71 h16 v64 h-16" fill="none" stroke="var(--color-linha2)" strokeWidth="1" />
+      <path data-ab="7" data-traco d="M224 103 h16" fill="none" stroke="var(--color-linha2)" strokeWidth="1" />
+      <rect data-ab="8" x="252" y="62" width="52" height="76" fill="var(--color-painel)" stroke="var(--color-ok)" strokeWidth="1.5" />
+      <line data-ab="9" data-traco x1="262" y1="80" x2="294" y2="80" stroke="var(--color-linha2)" strokeWidth="2" />
+      <line data-ab="9" data-traco x1="262" y1="92" x2="284" y2="92" stroke="var(--color-linha2)" strokeWidth="2" />
+      <path data-ab="10" data-traco d="M264 116 l7 8 l14 -18" fill="none" stroke="var(--color-ok)" strokeWidth="2" strokeLinecap="square" />
+      <text data-ab="11" x="24" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="var(--color-suave2)">IDEIA</text>
+      <text data-ab="11" x="94" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="var(--color-suave2)">PERGUNTAS</text>
+      <text data-ab="11" x="180" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="var(--color-suave2)">ESTRUTURA</text>
+      <text data-ab="11" x="256" y="168" fontFamily="IBM Plex Mono, monospace" fontSize="9" letterSpacing="1.6" fill="var(--color-suave2)">PRODUTO</text>
     </svg>
   );
 }
