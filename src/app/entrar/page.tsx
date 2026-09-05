@@ -20,7 +20,13 @@ export default async function Entrar() {
           <p className="mt-6 text-[clamp(1.8rem,4vw,3.4rem)] font-bold leading-none tracking-[-.035em]">Acompanhe o projeto sem caçar mensagem no WhatsApp.</p>
           <p className="mt-6 text-[15.5px] text-tinta2 leading-[1.7]">Progresso, linha do tempo de atualizações e conversa direta com quem está escrevendo o código.</p>
         </div>
-        <div className="relative flex gap-4 font-mono text-[11px] tracking-[.18em] uppercase text-suave"><span>Cliente</span><span>Equipe</span><span>Admin</span></div>
+        <div className="relative flex items-center gap-4 font-mono text-[11px] tracking-[.18em] uppercase text-suave">
+          <span>Cliente</span>
+          <span aria-hidden className="h-px w-6 bg-linha" />
+          <span>Equipe</span>
+          <span aria-hidden className="h-px w-6 bg-linha" />
+          <span>Admin</span>
+        </div>
       </div>
       <div className="flex items-center justify-center px-6 py-16 sm:px-16">
       <div className="w-full max-w-[400px]">

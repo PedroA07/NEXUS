@@ -36,6 +36,24 @@ export default async function Projetos() {
     </article>
   );
 
+  /* Fora dos três destaques o portfólio vira lista: quatro colunas rentes à
+     borda, sem moldura nem stack. Mantém a página respirando quando o acervo
+     cresce, e deixa claro na hierarquia o que é destaque e o que é acervo. */
+  const renderLinha = (p: NonNullable<typeof projetos>[number], ultimo: boolean) => (
+    <Link
+      key={p.slug}
+      href={p.link || `#${p.slug}`}
+      id={p.slug}
+      {...(p.link ? { target: "_blank", rel: "noreferrer" } : {})}
+      className={`grid gap-4 border-t border-linha py-[clamp(24px,3vw,34px)] scroll-mt-20 transition-colors duration-[350ms] hover:bg-[#12141c] sm:grid-cols-[100px_1fr_1.2fr_90px] sm:gap-[clamp(16px,3vw,40px)] sm:items-baseline ${ultimo ? "border-b" : ""}`}
+    >
+      <span className="font-mono text-[11px] tracking-[.2em] uppercase text-suave">{p.categoria || "Projeto"}</span>
+      <h3 className="text-[clamp(1.25rem,2vw,1.75rem)] font-semibold leading-[1.1] tracking-[-.022em]">{p.titulo}</h3>
+      <p className="text-[15.5px] text-tinta2 leading-[1.65]">{p.descricao || p.resumo}</p>
+      <span className="font-mono text-xs text-suave sm:text-right">{p.ano}</span>
+    </Link>
+  );
+
   return (
     <>
       <Cabecalho />
@@ -68,7 +86,7 @@ export default async function Projetos() {
             {outros.length > 0 && (
               <section aria-labelledby="projetos-outros" className={destaques.length > 0 ? "mt-[clamp(5rem,12vh,8.75rem)]" : ""}>
                 <span id="projetos-outros" className="font-mono text-[11px] tracking-[.22em] uppercase text-suave">Também no portfólio</span>
-                <div className="mt-6">{outros.map((p, i) => renderProjeto(p, i % 2 === 1, i === outros.length - 1))}</div>
+                <div className="mt-6">{outros.map((p, i) => renderLinha(p, i === outros.length - 1))}</div>
               </section>
             )}
           </div>

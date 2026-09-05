@@ -45,6 +45,13 @@ export function ServicosHorizontal({ servicos }: { servicos: Servico[] }) {
     pista.scrollBy({ left: direcao * (card.offsetWidth + 2), behavior: "smooth" });
   };
 
+  const irPara = (destino: number) => {
+    const pista = pistaRef.current;
+    const card = pista?.querySelector<HTMLElement>("[data-servico]");
+    if (!pista || !card) return;
+    pista.scrollTo({ left: destino * (card.offsetWidth + 2), behavior: "smooth" });
+  };
+
   const iniciarArraste = (ev: React.PointerEvent<HTMLDivElement>) => {
     const pista = pistaRef.current;
     if (!pista) return;
@@ -120,6 +127,58 @@ export function ServicosHorizontal({ servicos }: { servicos: Servico[] }) {
       <div className="secao mt-7">
         <div className="h-px bg-linha"><div className="h-px bg-ember transition-[width] duration-300" style={{ width: `${progresso}%` }} /></div>
         <p className="mt-4 font-mono text-[10.5px] tracking-[.2em] uppercase text-suave">Arraste para o lado</p>
+      </div>
+
+      {/* Segunda régua de controle: repete a navegação em alvo grande no fim da
+          pista, onde o olho já está depois de percorrer os cartões, e acrescenta
+          os pontos — que dizem de relance quantos serviços faltam. */}
+      <div className="secao mt-[clamp(20px,3vh,32px)] flex flex-wrap items-center gap-[clamp(16px,3vw,32px)]">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            aria-label="Serviço anterior"
+            onClick={() => mover(-1)}
+            disabled={indice === 0}
+            className="grid h-14 w-14 place-items-center bg-cartao border border-linha2 text-tinta font-mono text-[17px] transition-colors hover:border-ember hover:text-ember disabled:pointer-events-none disabled:opacity-30"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            aria-label="Próximo serviço"
+            onClick={() => mover(1)}
+            disabled={indice === servicos.length - 1}
+            className="grid h-14 w-14 place-items-center bg-tinta border border-tinta text-papel font-mono text-[17px] transition-transform duration-300 ease-[cubic-bezier(.16,1,.3,1)] hover:translate-x-[3px] disabled:pointer-events-none disabled:opacity-30"
+          >
+            →
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {servicos.map((servico, j) => (
+            <button
+              key={servico.numero}
+              type="button"
+              aria-label={`Ir para o serviço ${servico.numero}`}
+              aria-current={j === indice ? "true" : undefined}
+              onClick={() => irPara(j)}
+              className={`h-[3px] p-0 border-0 cursor-pointer transition-[width,background-color] duration-[400ms] ease-[cubic-bezier(.16,1,.3,1)] ${
+                j === indice ? "w-[34px] bg-tinta" : "w-[14px] bg-linha2"
+              }`}
+            />
+          ))}
+        </div>
+
+        <span className="flex-1 min-w-[60px] h-px bg-linha">
+          <span
+            className="block h-px bg-ember transition-[width] duration-300"
+            style={{ width: `${servicos.length > 1 ? (indice / (servicos.length - 1)) * 100 : 100}%` }}
+          />
+        </span>
+
+        <span className="font-mono text-[12px] tracking-[.14em] text-tinta2 tabular-nums whitespace-nowrap">
+          {String(indice + 1).padStart(2, "0")} / {String(servicos.length).padStart(2, "0")}
+        </span>
       </div>
     </>
   );

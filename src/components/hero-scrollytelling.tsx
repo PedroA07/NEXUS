@@ -462,7 +462,7 @@ function TextoCapitulo({ bloco, indice }: { bloco: Bloco; indice: number }) {
             {bloco.cta && (
               <div className="mt-[clamp(1.75rem,4vh,2.75rem)] flex flex-wrap gap-3.5 items-center">
                 <Link href="/solicitar" className="btn-p whitespace-nowrap">
-                  Preencher o briefing <span className="font-mono font-medium">→</span>
+                  Contar minha ideia <span className="font-mono font-medium">→</span>
                 </Link>
                 <Link href="#projetos" className="btn-s whitespace-nowrap">Ver projetos</Link>
               </div>
@@ -504,7 +504,7 @@ function BlocoEstatico({ bloco }: { bloco: Bloco }) {
       <p className="mt-5 text-lg text-tinta2 leading-relaxed">{bloco.corpo}</p>
       {bloco.cta && (
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/solicitar" className="btn-p">Preencher o briefing</Link>
+          <Link href="/solicitar" className="btn-p">Contar minha ideia</Link>
           <Link href="/projetos" className="btn-s">Ver projetos</Link>
         </div>
       )}
